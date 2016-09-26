@@ -168,7 +168,34 @@ class SearchEngine(object):
 				* If two articles have the same distance, titles should be in alphabetical order
 		"""
 		# TODO: Implement this for part (b)
-		return []
+
+		#store a word frequency dict for each article in this list
+		wordFreqDictList = []
+
+		#get a word frequency dictionary for the queried article
+		queryWordFreqDict = buildWordFreqDict(self.corpus[title])
+		wordFreqDictList.append(queryWordFreqDict)
+
+		#for all of the other articles in the corpus, build word freqency dicts and compute angle
+		for other_title in corpus.keys():
+
+			#if we're looking at the query article, ignore it and move on
+			if other_title == title:
+				continue
+
+			else: #this is a new article
+				#build a word freq dict for the other article
+				otherWordFreqDict = buildWordFreqDict(self.corpus[other_title])
+				wordFreqDictList.append(otherWordFreqDict)
+
+		#now we have a list of word freq dicts, so we can compute IDFs for each word
+		#however, we only need to compute IDFs for words in the query article, because other words do not contribute to angle
+		queryWordIDFDict = {}
+		for word in 
+
+				
+
+
 
 	def search(self, query, k):
 		"""
