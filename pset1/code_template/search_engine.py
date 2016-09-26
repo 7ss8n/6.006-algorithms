@@ -31,6 +31,38 @@ def computeAngleBetweenWordFreqDicts(d1, d2):
 	return angle
 
 
+
+def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
+	"""
+	Converts two WF dictionaries d1 and d2 to WFIDF dictionaries, then computes the angle between them
+	"""
+
+	#multiply every element in the word frequency dictionaries by the corresponding IDF
+	for i in d1.keys():
+		d1[i]*=corpusIDFDict[i]
+
+	for j in d2.keys():
+		d2[j]*=corpusIDFDict[j] 
+
+
+	dotProd = 0
+	for w in d1.keys():
+		try:
+			#the IDF is squared because the entries in both d1 and d2 should be multiplied by it
+			dotProd+=d1[w]*d2[w]
+		#if this returns an error, this means that the word "w" is not in d2, so it will contribute 0 to the dot product
+		except:
+			continue
+
+	d1_magnitude = math.sqrt(math.fsum([x**2 for x in d1.values()]))
+	d2_magnitude = math.sqrt(math.fsum([y**2 for y in d2.values()]))
+
+	#now compute the angle
+	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
+	return angle
+
+
+
 def buildWordFreqDict(list_of_words):
 	"""
 	list_of_words: a list of the words in an article
@@ -126,7 +158,7 @@ class SearchEngine(object):
 		queryWordFreqDict = buildWordFreqDict(self.corpus[title])
 
 		#for all of the other articles in the corpus, build word freqency dicts and compute angle
-		for other_title in corpus.keys():
+		for other_title in self.corpus.keys():
 
 			#if we're looking at the query article, ignore it and move on
 			if other_title == title:
@@ -169,29 +201,50 @@ class SearchEngine(object):
 		"""
 		# TODO: Implement this for part (b)
 
-		#store a word frequency dict for each article in this list
-		wordFreqDictList = []
+		
+		#store a word frequency dict for each article in a larger dictionary
+		# STRUCTURE OF THE DICT: {article title: {word1: #, word2: #}}
+		wordFreqDictDict = {}
+		for title in corpus.keys():
+			wordFreqDictDict[title] = buildWordFreqDict(self.corpus[title])
 
-		#get a word frequency dictionary for the queried article
-		queryWordFreqDict = buildWordFreqDict(self.corpus[title])
-		wordFreqDictList.append(queryWordFreqDict)
+		#now we have a dict of word freq dicts, so we can compute IDFs for each word in the corpus
+		numArticles = len(wordFreqDictDict)
+		corpusIDFDict = {}
 
-		#for all of the other articles in the corpus, build word freqency dicts and compute angle
-		for other_title in corpus.keys():
+		#consider every word in the corpus, and find out how many documents it occurs in
+		docFreqDict = {}
+		for article in wordFreqDictDict.values(): #each article is a word frequency dictionary
+			for word in article.keys():
+				try:
+					docFreqDict[word]+=1
+				except:
+					docFreqDict[word]=1
 
-			#if we're looking at the query article, ignore it and move on
+		#now build a dictionary with every word in the corpus as a key, and its IDF as a value
+		for word in docFreqDict.keys():
+			corpusIDFDict[word] = math.log((float(docFreqDict[word]) / numArticles), 2.71828)
+
+		#now compute the angle between every article and the query article, and store it as a title/document-distance object
+		titleDistPairs = []
+		for other_title in self.corpus.keys():
+
+			#don't compare the query article to itself
 			if other_title == title:
 				continue
+			else:
+				angle = computeAngleBetweenWFIDFDicts(wordFreqDictDict[title],wordFreqDictDict[other_title],corpusIDFDict)
+				titleDistPairs.append(titleDistPair(other_title,angle))
+		
+		#now sort the list of title/distance pairs to find the k-nearest
+		#the first k entries in the list will be the k-nearest
+		titleDistPairs.sort()
 
-			else: #this is a new article
-				#build a word freq dict for the other article
-				otherWordFreqDict = buildWordFreqDict(self.corpus[other_title])
-				wordFreqDictList.append(otherWordFreqDict)
+		#take the k-nearest, and convert from a title/dist object to a tuple
+		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
+		return kClosest
 
-		#now we have a list of word freq dicts, so we can compute IDFs for each word
-		#however, we only need to compute IDFs for words in the query article, because other words do not contribute to angle
-		queryWordIDFDict = {}
-		for word in 
+
 
 				
 
@@ -222,7 +275,7 @@ if __name__ == '__main__':
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
 
-	kclosest = e.get_relevant_articles_doc_dist('Computer',10)
+	kclosest = e.get_relevant_articles_tf_idf('Computer',10)
 	print kclosest
 	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
