@@ -27,7 +27,7 @@ def computeAngleBetweenWordFreqDicts(d1, d2):
 	d2_magnitude = math.sqrt(math.fsum([y**2 for y in d2.values()]))
 
 	#now compute the angle
-	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
+	angle = math.acos(float(dotProd) / float(d1_magnitude*d2_magnitude))
 	return angle
 
 
@@ -42,23 +42,23 @@ def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	for i in d1.keys():
 		#print corpusIDFDict[i]
 		#print d1[i]
-		d1_idf[i] = d1[i]*corpusIDFDict[i]
+		d1_idf[i] = d1[i] * corpusIDFDict[i]
 
 	d2_idf = {}
 	for j in d2.keys():
-		d2_idf[j] = d2[j]*corpusIDFDict[j] 
+		d2_idf[j] = d2[j] *corpusIDFDict[j] 
 
 
 	dotProd = 0
 	for w in d1.keys():
 		try:
 			dotProd+=d1_idf[w]*d2_idf[w]
-		#if this returns an error, this means that the word "w" is not in d2, so it will contribute 0 to the dot product
+		#if this returns an errors, this means that the word "w" is not in d2, so it will contribute 0 to the dot product
 		except:
 			continue
 
-	d1_magnitude = math.sqrt(math.fsum([x**2 for x in d1_idf.values()]))
-	d2_magnitude = math.sqrt(math.fsum([y**2 for y in d2_idf.values()]))
+	d1_magnitude = math.fsum([x**2 for x in d1_idf.values()])**0.5
+	d2_magnitude = math.fsum([y**2 for y in d2_idf.values()])**0.5
 
 	#now compute the angle
 	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
@@ -121,6 +121,29 @@ class titleDistPair(object):
 				return 1
 			else:
 				return 0
+
+class titleRelevancePair(object):
+	def __init__(self, title, TFIDF_score):
+		self.title = title
+		self.tfidf_score = TFIDF_score
+	def __cmp__(self,other):
+		if type(other) == int:
+			#print "Handled int"
+			return 1
+		#print "Comparing:", self, other
+		if self.tfidf_score > other.tfidf_score:
+			return 1
+		elif self.tfidf_score < other.tfidf_score:
+			return -1
+		elif self.tfidf_score == other.tfidf_score:
+			if self.title<other.title:
+				return -1
+			elif self.title>other.title:
+				return 1
+			else:
+				return 0
+	def __repr__(self):
+		return "(%s,%f)" % (self.title,self.tfidf_score)
 
 
 class SearchEngine(object):
@@ -227,7 +250,7 @@ class SearchEngine(object):
 
 		#now build a dictionary with every word in the corpus as a key, and its IDF as a value
 		for word in docFreqDict.keys():
-			corpusIDFDict[word] = math.log((float(numArticles) / docFreqDict[word]))
+			corpusIDFDict[word] = math.log((float(numArticles) / float(docFreqDict[word])))
 
 		#print(corpusIDFDict)
 		#now compute the angle between every article and the query article, and store it as a title/document-distance object
@@ -275,12 +298,80 @@ class SearchEngine(object):
 		"""
 		# TODO: Implement this for part (c)
 
+		#build a word frequency dictionary for each article
+		wordFreqDictDict = {}
+		for article in self.corpus.keys():
+			#print article
+			wordFreqDictDict[article] = buildWordFreqDict(self.corpus[article])
+
+
+		#now we have a dict of word freq dicts, so we can compute IDFs for each word in the corpus
+		numArticles = len(wordFreqDictDict)
+		corpusIDFDict = {}
+
+		#consider every word in the corpus, and find out how many documents it occurs in
+		docFreqDict = {}
+		for article in wordFreqDictDict.values(): #each article, in this case, is a word frequency dictionary
+			for word in article.keys():
+				try:
+					docFreqDict[word]+=1
+				except:
+					docFreqDict[word]=1
+
+		#now build a dictionary with every word in the corpus as a key, and its IDF as a value
+		for word in docFreqDict.keys():
+			corpusIDFDict[word] = math.log((float(numArticles) / float(docFreqDict[word])))
+
+
+		#for each article, build a TFIDF score dictionary
+		TFIDFDictDict = {}
+		for article in self.corpus.keys():
+			wfd = wordFreqDictDict[article]
+			for word in wfd:
+				wfd[word]*=corpusIDFDict[word]
+			TFIDFDictDict[article] = wfd
+
 		#get the query as a list of lowercase words
 		query.lower()
-		parsedQuery = query.split(' ')
+		parsedQueryRepeats = query.split(' ')
 
-		queryWordFreqDict = buildWordFreqDict(parsedQuery)
+		#remove repeats from the parsed query
+		parsedQuery = []
+		for q in parsedQueryRepeats:
+			if q not in parsedQuery:
+				parsedQuery.append(q)
 
+		#for each article, compute its TFIDF score based on the search
+		relevanceScoreList = []
+		for article in wordFreqDictDict.keys():
+			TFIDF_score = 0
+			for word in parsedQuery:
+				try:
+					#try to add the TFIDF score of the particular word in the given article
+					TFIDF_score += TFIDFDictDict[article][word]
+				except: #this means the word wasn't in the article
+					pass
+
+			#now add the totalled relevance score to the relevance score dict
+			#print TFIDF_score
+			relevanceScoreList.append((titleRelevancePair(article,TFIDF_score)))
+		
+
+		#sort the relevance score list to put the most relevant articles at the front of the list
+		relevanceScoreList.sort(reverse=True)
+		#relevanceScoreList = sorted(relevanceScoreList, reverse=True)
+
+		kbest = relevanceScoreList[0:k] #take only the kbest
+
+		#now only take the nonnegative results
+		kbest_nonnegative = []
+		for i in kbest:
+			if i>0:
+				kbest_nonnegative.append(i)
+
+		#convert back to a tuple
+		kClosest = [(i.title, i.tfidf_score) for i in kbest_nonnegative]
+		return kClosest
 
 		
 if __name__ == '__main__':
@@ -289,7 +380,10 @@ if __name__ == '__main__':
 	e = SearchEngine(corpus)
 
 	kclosest = e.get_relevant_articles_tf_idf('Berry',5)
-	print kclosest
+	print(kclosest)
+	
+	#results = e.search('should i use a graph algorithm or tree algorithm',5)
+	#print results
 	
 	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
@@ -306,7 +400,7 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
-
 	"""
+
 
 	
