@@ -146,13 +146,19 @@ Below is a list of the constants used in runtime analysis for parts (b) and (c):
 	\item $k$, the number of relevant articles to return
 	\item $q$, the number of distinct terms in the query (for part (c))
 	\item $w$, the number of unique words in the corpus (no repeats)
+	\item $l$, the total number of words (with repeats) in the query (for part (c))
 \end{itemize}
 
 %make a list of the steps in part(b) with their runtime expressions
 
+%%% STORE NEEDED VARIABLES HERE %%%
 \newcommand{\functionb}{get-relevant-articles-tf-idf}
+\newcommand{\functionc}{search}
 
+% use \vspace to add vertical space!
+\vspace{5mm}
 
+% text for analysis of part (b)
 The implementation of {\bf \functionb} from {\bf part(b)} is outlined below:
 \begin{enumerate}
 	\item For each article, build a term-frequency dictionary. This takes $\theta(nm)$ time, because the code iterates over exactly $n$ articles, and $m$ words in each article.
@@ -170,6 +176,21 @@ The implementation of {\bf \functionb} from {\bf part(b)} is outlined below:
 	\item The angle between every article and the query article is stored in a list. There are $n-1$ elements in the list, so it will take $O(n \cdot log_2n)$ time to sort this list.
 	\item To return the $k$ closest articles from the sorted list, it will take $\theta(k)$ time.
 \end{enumerate}
+
+\vspace{5mm}
+
+%text for analysis of part (c)
+The implementation of {\bf \functionc} from {\bf part(c)} is outlined below:
+\begin{enumerate}
+	\item For each article build a term-frequency dictionary. This takes $\theta(nm)$ time, because the code iterates over exactly $n$ articles, and $m$ words in each article.
+	\item Next, the function builds a document-frequency dictionary, storing each word in the corpus as a key, and the number of articles that contain that word as a value. This takes $\theta(nm)$ time, because the code iterates over $n$ articles, and $m$ words in each article.
+	\item For each {\textit unique} term in the corpus, the inverse-document-frequency is computed and added to a new {\bf corpusIDFDict} dictionary. This takes $\theta(w)$ time, because the code only considers unique words, without repeats.
+	\item Parse the user's query and remove repeated words. This takes $\theta(l)$ time.
+	\item For each article, add up the TFIDF scores for each distinct word in the query to get a total score. This takes $\theta(nq)$ time, because there are $n$ articles and $q$ words in the query that must be retrieved from an article's TFIDF dictionary.
+	\item It takes $O(n \cdot log_2n)$ time to sort the list of $n$ articles by their TFIDF score.
+	\item It takes $\theta(k)$ time to take the $k$ best non-negative articles from the sorted list of articles.
+\end{enumerate}
+
 
 
 
