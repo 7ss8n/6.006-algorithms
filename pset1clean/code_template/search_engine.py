@@ -1,16 +1,6 @@
-# -*- coding: utf-8 -*-
-
-
 import os
 import math
 import re
-
-"""
-Construct a program that, given an article title, returns the k articles with the least distance
-from that article. Specifically, implement the get relevant articles doc dist
-function in search engine.py.
-"""
-
 
 def computeAngleBetweenWordFreqDicts(d1, d2):
 	"""
@@ -32,8 +22,6 @@ def computeAngleBetweenWordFreqDicts(d1, d2):
 	#now compute the angle
 	angle = math.acos(float(dotProd) / float(d1_magnitude*d2_magnitude))
 	return angle
-
-
 
 def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	"""
@@ -67,8 +55,6 @@ def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
 	return angle
 
-
-
 def buildWordFreqDict(list_of_words):
 	"""
 	list_of_words: a list of the words in an article
@@ -87,8 +73,6 @@ def buildWordFreqDict(list_of_words):
 			wordFreqDict[word.lower()]=1
 	return wordFreqDict
 
-
-
 def extract_corpus(corpus_dir = "articles"):
 	"""
 	Returns a corpus of articles from the given directory.
@@ -104,8 +88,9 @@ def extract_corpus(corpus_dir = "articles"):
 	num_documents = 0
 	for filename in os.listdir(corpus_dir):
 		with open(os.path.join(corpus_dir, filename)) as f:
-			corpus[filename] = re.sub("[^\w]", " ", f.read()).split()
+			corpus[filename] = re.sub("[^\w]", " ",  f.read()).split()
 	return corpus
+
 
 #title dist pair object that makes it easier to sort a list of title/distance pairs
 class titleDistPair(object):
@@ -147,7 +132,6 @@ class titleRelevancePair(object):
 				return 0
 	def __repr__(self):
 		return "(%s,%f)" % (self.title,self.tfidf_score)
-
 
 class SearchEngine(object):
 	"""
@@ -210,7 +194,6 @@ class SearchEngine(object):
 		#take the k-nearest, and convert from a title/dist object to a tuple
 		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
 		return kClosest
-
 
 	def get_relevant_articles_tf_idf(self, title, k):
 		"""
@@ -280,7 +263,6 @@ class SearchEngine(object):
 		#take the k-nearest, and convert from a title/dist object to a tuple
 		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
 		return kClosest
-
 
 	def search(self, query, k):
 		"""
@@ -375,20 +357,10 @@ class SearchEngine(object):
 		#convert back to a tuple
 		kClosest = [(i.title, i.tfidf_score) for i in kbest_nonnegative]
 		return kClosest
-
 		
 if __name__ == '__main__':
-
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
-
-	kclosest = e.get_relevant_articles_tf_idf('Berry',5)
-	print(kclosest)
-	
-	#results = e.search('should i use a graph algorithm or tree algorithm',5)
-	#print results
-	
-	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
 	while True:
@@ -403,7 +375,3 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
-	"""
-
-
-	
