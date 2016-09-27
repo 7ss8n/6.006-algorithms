@@ -99,8 +99,9 @@ class titleDistPair(object):
 		self.angle = angle
 
 	def __lt__(self,other):
-		if self.angle < other.angle or self.title < other.title:
+		if self.angle < other.angle:
 			return True
+
 	def __eq__(self,other):
 		if self.angle == other.angle and self.title == other.title:
 			return True
@@ -114,7 +115,7 @@ class titleRelevancePair(object):
 	def __gt__(self,other):
 		if type(other)==int:
 			return True
-			
+
 	def __lt__(self,other):
 		if self.tfidf_score < other.tfidf_score:
 			return True
@@ -354,6 +355,11 @@ class SearchEngine(object):
 if __name__ == '__main__':
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
+
+	result = e.get_relevant_articles_tf_idf('Berry',5)
+	#print(result)
+
+	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
 	while True:
@@ -368,3 +374,5 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
+
+	"""
