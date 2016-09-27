@@ -18,15 +18,22 @@
 \newcommand{\releasedate}{Tuesday, September 13}
 \newcommand{\partaduedate}{Tuesday, September 27}
 \newcommand{\tabUnit}{3ex}
+\newcommand{\myname}{Milo H. Knowles}
+
+%define collaborators here
+\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Kacie Bawiec}
+
 \newcommand{\tabT}{\hspace*{\tabUnit}}
 
 \title{6.006 Problem Set 1}
 
+%everything after the begin command is in the document
 \begin{document}
 
 \handout{Problem Set \theproblemsetnum}{September 13, 2016}
 
 \textbf{All parts are due {\bf \partaduedate} at {\bf 11:59PM}}.
+\textbf{asfjsdlkfjkldsjf}
 
 \setlength{\parindent}{0pt}
 
@@ -36,11 +43,11 @@
 
 \medskip
 
-{\bf Name:} Your Name
+{\bf Name:} \myname
 
 \medskip
 
-{\bf Collaborators:} Name1, Name2 
+{\bf Collaborators:} \collabs
 
 \medskip
 
@@ -98,6 +105,7 @@
 
 \begin{problems}
 
+%star after section means that the section is not NUMBERED
 \section*{Part A}
 
 \problem  % Problem 1
@@ -130,6 +138,43 @@
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart Part d % Problem 4d
+
+Below is a list of the constants used in runtime analysis for parts (b) and (c):
+\begin{itemize}
+	\item $n$, the total number of articles
+	\item $m$, the total number of words in each article (assumed to be the same for every article)
+	\item $k$, the number of relevant articles to return
+	\item $q$, the number of distinct terms in the query (for part (c))
+	\item $w$, the number of unique words in the corpus (no repeats)
+\end{itemize}
+
+%make a list of the steps in part(b) with their runtime expressions
+
+\newcommand{\functionb}{get-relevant-articles-tf-idf}
+
+
+The implementation of {\bf \functionb} from {\bf part(b)} is outlined below:
+\begin{enumerate}
+	\item For each article, build a term-frequency dictionary. This takes $\theta(nm)$ time, because the code iterates over exactly $n$ articles, and $m$ words in each article.
+	\item Next, the function builds a document-frequency dictionary, storing each word in the corpus as a key, and the number of articles that contain that word as a value. This takes $\theta(nm)$ time, because the code iterates over $n$ articles, and $m$ words in each article.
+	\item For each {\textit unique} term in the corpus, the inverse-document-frequency is computed and added to a new {\bf corpusIDFDict} dictionary. This takes $\theta(w)$ time, because the code only considers unique words, without repeats.
+	\item For each article in the corpus an angle is computed between that article and the query article. $\theta(n-1)$ comparisons must be done, because the query article is not compared to itself. The helper function {\bf computeAngleBetweenWFIDFDicts} is used to compute the angle between two WFIDF dictionaries. It runs in $\theta(5m)$ time.
+		\begin{itemize}
+			\item The helper function {\bf computeAngleBetweenWFIDFDicts} is used to compute the angle between two WFIDF dictionaries. It runs in $\theta(5m)$ time.
+			\item $\theta(m)$ to convert one term-frequency dictionary to a TFIDF dictionary.
+			\item $\theta(m)$ to convert the other term-frequency dictionary to a TFIDF dictionary.
+			\item $\theta(m)$ to compute the dot product of the two TFIDF dictionary values.
+			\item $\theta(m)$ to compute the magnitude of one TFIDF dictionary.
+			\item $\theta(m)$ to compute the magnitude of the other TFIDF dictionary.
+		\end{itemize}
+	\item The angle between every article and the query article is stored in a list. There are $n-1$ elements in the list, so it will take $O(n \cdot log_2n)$ time to sort this list.
+	\item To return the $k$ closest articles from the sorted list, it will take $\theta(k)$ time.
+\end{enumerate}
+
+
+
+
+
 \problempart Part e % Problem 4e
 \end{problemparts}
 
