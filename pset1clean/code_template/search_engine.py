@@ -97,39 +97,32 @@ class titleDistPair(object):
 	def __init__(self, title, angle):
 		self.title = title
 		self.angle = angle
-	def __cmp__(self,other):
-		if self.angle < other.angle:
-			return -1
-		elif self.angle > other.angle:
-			return 1
-		else:
-			if self.title<other.title:
-				return -1
-			elif self.title>other.title:
-				return 1
-			else:
-				return 0
+
+	def __lt__(self,other):
+		if self.angle < other.angle or self.title < other.title:
+			return True
+	def __eq__(self,other):
+		if self.angle == other.angle and self.title == other.title:
+			return True
+
 
 class titleRelevancePair(object):
 	def __init__(self, title, TFIDF_score):
 		self.title = title
 		self.tfidf_score = TFIDF_score
-	def __cmp__(self,other):
-		if type(other) == int:
-			#print "Handled int"
-			return 1
-		#print "Comparing:", self, other
-		if self.tfidf_score > other.tfidf_score:
-			return 1
-		elif self.tfidf_score < other.tfidf_score:
-			return -1
-		elif self.tfidf_score == other.tfidf_score:
-			if self.title<other.title:
-				return -1
-			elif self.title>other.title:
-				return 1
-			else:
-				return 0
+
+	def __gt__(self,other):
+		if type(other)==int:
+			return True
+			
+	def __lt__(self,other):
+		if self.tfidf_score < other.tfidf_score:
+			return True
+
+	def __eq__(self,other):
+		if self.tfidf_score == other.tfidf_score and self.title == other.title:
+			return True
+
 	def __repr__(self):
 		return "(%s,%f)" % (self.title,self.tfidf_score)
 
