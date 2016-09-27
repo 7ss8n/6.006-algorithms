@@ -38,24 +38,27 @@ def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	"""
 
 	#multiply every element in the word frequency dictionaries by the corresponding IDF
+	d1_idf = {}
 	for i in d1.keys():
-		d1[i]*=corpusIDFDict[i]
+		#print corpusIDFDict[i]
+		#print d1[i]
+		d1_idf[i] = d1[i]*corpusIDFDict[i]
 
+	d2_idf = {}
 	for j in d2.keys():
-		d2[j]*=corpusIDFDict[j] 
+		d2_idf[j] = d2[j]*corpusIDFDict[j] 
 
 
 	dotProd = 0
 	for w in d1.keys():
 		try:
-			#the IDF is squared because the entries in both d1 and d2 should be multiplied by it
-			dotProd+=d1[w]*d2[w]
+			dotProd+=d1_idf[w]*d2_idf[w]
 		#if this returns an error, this means that the word "w" is not in d2, so it will contribute 0 to the dot product
 		except:
 			continue
 
-	d1_magnitude = math.sqrt(math.fsum([x**2 for x in d1.values()]))
-	d2_magnitude = math.sqrt(math.fsum([y**2 for y in d2.values()]))
+	d1_magnitude = math.sqrt(math.fsum([x**2 for x in d1_idf.values()]))
+	d2_magnitude = math.sqrt(math.fsum([y**2 for y in d2_idf.values()]))
 
 	#now compute the angle
 	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
@@ -205,8 +208,9 @@ class SearchEngine(object):
 		#store a word frequency dict for each article in a larger dictionary
 		# STRUCTURE OF THE DICT: {article title: {word1: #, word2: #}}
 		wordFreqDictDict = {}
-		for title in corpus.keys():
-			wordFreqDictDict[title] = buildWordFreqDict(self.corpus[title])
+		for t in self.corpus.keys():
+			wordFreqDictDict[t] = buildWordFreqDict(self.corpus[t])
+		#print wordFreqDictDict
 
 		#now we have a dict of word freq dicts, so we can compute IDFs for each word in the corpus
 		numArticles = len(wordFreqDictDict)
@@ -214,7 +218,7 @@ class SearchEngine(object):
 
 		#consider every word in the corpus, and find out how many documents it occurs in
 		docFreqDict = {}
-		for article in wordFreqDictDict.values(): #each article is a word frequency dictionary
+		for article in wordFreqDictDict.values(): #each article, in this case, is a word frequency dictionary
 			for word in article.keys():
 				try:
 					docFreqDict[word]+=1
@@ -223,18 +227,25 @@ class SearchEngine(object):
 
 		#now build a dictionary with every word in the corpus as a key, and its IDF as a value
 		for word in docFreqDict.keys():
-			corpusIDFDict[word] = math.log((float(docFreqDict[word]) / numArticles), 2.71828)
+			corpusIDFDict[word] = math.log((float(numArticles) / docFreqDict[word]))
 
+		#print(corpusIDFDict)
 		#now compute the angle between every article and the query article, and store it as a title/document-distance object
 		titleDistPairs = []
+		#print wordFreqDictDict[title]
+
+		counter = 0
 		for other_title in self.corpus.keys():
 
 			#don't compare the query article to itself
 			if other_title == title:
 				continue
+
 			else:
+				#print wordFreqDictDict[title]
 				angle = computeAngleBetweenWFIDFDicts(wordFreqDictDict[title],wordFreqDictDict[other_title],corpusIDFDict)
 				titleDistPairs.append(titleDistPair(other_title,angle))
+
 		
 		#now sort the list of title/distance pairs to find the k-nearest
 		#the first k entries in the list will be the k-nearest
@@ -243,11 +254,6 @@ class SearchEngine(object):
 		#take the k-nearest, and convert from a title/dist object to a tuple
 		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
 		return kClosest
-
-
-
-				
-
 
 
 	def search(self, query, k):
@@ -268,15 +274,23 @@ class SearchEngine(object):
 			    * If two articles have the same score, titles should be in alphabetical order
 		"""
 		# TODO: Implement this for part (c)
-		return []
+
+		#get the query as a list of lowercase words
+		query.lower()
+		parsedQuery = query.split(' ')
+
+		queryWordFreqDict = buildWordFreqDict(parsedQuery)
+
+
 		
 if __name__ == '__main__':
 
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
 
-	kclosest = e.get_relevant_articles_tf_idf('Computer',10)
+	kclosest = e.get_relevant_articles_tf_idf('Berry',5)
 	print kclosest
+	
 	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
@@ -294,3 +308,5 @@ if __name__ == '__main__':
 				print ("    - %s (score %f)" % (title, score))
 
 	"""
+
+	
