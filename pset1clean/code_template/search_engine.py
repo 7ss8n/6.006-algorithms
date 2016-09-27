@@ -101,6 +101,9 @@ class titleDistPair(object):
 	def __lt__(self,other):
 		if self.angle < other.angle:
 			return True
+		elif self.angle == other.angle:
+			if self.title < other.title:
+				return True
 
 	def __eq__(self,other):
 		if self.angle == other.angle and self.title == other.title:
@@ -119,6 +122,9 @@ class titleRelevancePair(object):
 	def __lt__(self,other):
 		if self.tfidf_score < other.tfidf_score:
 			return True
+		elif self.tfidf_score == other.tfidf_score:
+			if self.title < other.title:
+				return True
 
 	def __eq__(self,other):
 		if self.tfidf_score == other.tfidf_score and self.title == other.title:
