@@ -168,7 +168,12 @@ If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily com
      };
 \end{tikzpicture} \\
 \bigskip
-	
+
+The $2T(\frac{n}{2})$ term is the split time.\\
+The $n$ term represents the merge time. \\
+ 
+At the 0th level of the tree, $T(n)$ has to merge 2 leaves, each of size $\frac{n}{2}$. Therefore it takes $n$ time to combine on that level. At each level, the time to combine is still $n$, because there are twice as many leaves, but each leaf has half the size. There are $logn$ levels of the tree, and each level has a combine time of $n$, so $T(n) = O(n \log n)$.
+
 	\vspace{5mm}
 	
 	\item $T(n) = T(\frac{n}{2})+ O(n)$ \\
@@ -181,7 +186,27 @@ If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily com
 \end{enumerate}
 
 
-\problempart Part b % Problem 2b
+\problempart Setting up recurrences:
+\begin{enumerate}
+	
+	\item To naively calculate the $n^{th}$ factorial number: \\
+	$T(n\leq1) = O(1)$ \\
+	$T(n) = T(n-1) + O(1)$ \\
+	
+Solution:
+\begin{center}
+$ T(n) = T(n-1) + O(1)$\\
+$ T(n) = T(n-2) + O(1) + O(1)$\\
+$ T(n) = T(n-3) + O(1) + O(1) + O(1)$\\
+$ T(n) = n \cdot O(1)$ \\
+$ T(n) = O(n)$ \\
+ \end{center}
+
+	\item To naively calculate the $n^{th}$ Fibonacci number: \\
+	$T(n\leq1) = O(1)$ \\
+	$T(n) = T(n-1) + T(n-2) + O(1)$\\
+
+\end{enumerate}
 \end{problemparts}
 
 \problem  % Problem 3
