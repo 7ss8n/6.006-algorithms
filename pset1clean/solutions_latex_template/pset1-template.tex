@@ -1,7 +1,11 @@
 %
 % 6.006 problem set 1 solutions template
 %
+
+
 \documentclass[12pt,twoside]{article}
+
+\usepackage{tikz}\usetikzlibrary{trees}
 
 \usepackage{amsmath}
 \usepackage{color}
@@ -137,7 +141,33 @@ If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily com
 	\item $T(n) = 10T(\frac{n}{3})+ n^2 = O(n^{log_3 10})$
 	\item $T(n) = 2T(\frac{n}{2})+ n$ \\
 	Using the Master Theorem, $T(n)=O(n log n)$ \\
-	Using the recursion tree method:
+	Using the recursion tree method: \\
+	
+	
+\begin{tikzpicture}[level distance=1.5cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=1.5cm}]
+  \node {$T(n)$}
+     child {node {$T(\frac{n}{2})$}
+     child {node {$...$}   
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}
+    }
+      child {node {$...$}
+      child {node {$T(1)$}}
+      child {node {$T(1)$}}}
+    }
+     child {node {$T(\frac{n}{2})$}
+     child {node {$...$}
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}}
+     child {node {$...$}
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}
+     } 
+     };
+\end{tikzpicture} \\
+\bigskip
 	
 	\vspace{5mm}
 	

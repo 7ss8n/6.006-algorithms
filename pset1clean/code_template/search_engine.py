@@ -354,6 +354,13 @@ class SearchEngine(object):
 if __name__ == '__main__':
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
+
+	result_dd = e.get_relevant_articles_doc_dist("Apple",3)
+	result_tfidf = e.get_relevant_articles_tf_idf("Apple",3)
+	print "DOCDIST:", result_dd
+	print "TFIDF:", result_tfidf
+
+	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
 	while True:
@@ -368,4 +375,6 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
+
+	"""
 	
