@@ -20,12 +20,12 @@
 
 \newcommand{\theproblemsetnum}{1}
 \newcommand{\releasedate}{Tuesday, September 13}
-\newcommand{\partaduedate}{Tuesday, September 27}
+\newcommand{\partaduedate}{Tuesday, September 28}
 \newcommand{\tabUnit}{3ex}
 \newcommand{\myname}{Milo H. Knowles}
 
 %define collaborators here
-\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Kacie Bawiec, Wala'a Alkhanaizi}
+\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Wala'a Alkhanaizi}
 
 \newcommand{\tabT}{\hspace*{\tabUnit}}
 
@@ -62,7 +62,7 @@
 
 % Some useful commands:
 %$f(x) = \Theta(x)$
-%$T(x, y) \leq \log(x) + 2^y + \binom{2n}{n}$
+%$T(x, y) \leq \\log(x) + 2^y + \binom{2n}{n}$
 % {\tt code\_function}
 
 
@@ -114,15 +114,15 @@
 \problem  % Problem 1
 
 \begin{problemparts}
-\problempart In order of increasing growth: $$[(log_2n^2)^2, n, nlogn,  n^2, 2^n ]$$
+\problempart In order of increasing growth: $$[(\log_2n^2)^2, n, n\log n,  n^2, 2^n ]$$
 First,
-$$(logn^2)^2 = 4(logn)^2$$ which grows more slowly than $n$ because generally the logarithm of a number is less than the number itself. This also explains why $nlogn$ is before $n^2$. An expression with a growing variable in the exponent will be bigger than an expression with a constant exponent, so $O(2^n)$ is the largest.
+$$(\log n^2)^2 = 4(\log n)^2$$ which grows more slowly than $n$ because generally the logarithm of a number is less than the number itself. This also explains why $n \log n$ is before $n^2$. An expression with a growing variable in the exponent will be bigger than an expression with a constant exponent, so $O(2^n)$ is the largest.
 
 \problempart In order of increasing growth: $$[f_1, f_6, f_3, f_5, f_2, f_4]$$
 First, some simplifications:
-$$f_1 = log((logn)^3) = 3log(logn)$$
-$$f_5 = log(3(n^{n^3})) = n^3log(3n)$$
-$f_1$ has the smallest order of growth because it is a log of a log. $f_6$ is the next smallest because it has a constant exponent. $f_3$ is raised to the power $logn$ which grows more slowly than the $n^3$ term of  $f_5$. $f_2$ has an exponent that grows with $n$, but $f_4$ is biggest because it has two layers of exponents, one of which is constant, and one of which grows with n.
+$$f_1 = \log((\log n)^3) = 3log(\log n)$$
+$$f_5 = \log(3(n^{n^3})) = n^3\log(3n)$$
+$f_1$ has the smallest order of growth because it is a log of a log. $f_6$ is the next smallest because it has a constant exponent. $f_3$ is raised to the power $\log n$ which grows more slowly than the $n^3$ term of  $f_5$. $f_2$ has an exponent that grows with $n$, but $f_4$ is biggest because it has two layers of exponents, one of which is constant, and one of which grows with n.
 
 \problempart In order of increasing growth: $$[f_5, f_1, f_2, f_4, f_3]$$
 
@@ -138,9 +138,9 @@ If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily com
 \problempart Solving Recurrences
 \begin{enumerate}
 	\item $T(n) = 8T(\frac{n}{3})+ n^2 = O(n^2)$
-	\item $T(n) = 10T(\frac{n}{3})+ n^2 = O(n^{log_3 10})$
+	\item $T(n) = 10T(\frac{n}{3})+ n^2 = O(n^{\log_3 10})$
 	\item $T(n) = 2T(\frac{n}{2})+ n$ \\
-	Using the Master Theorem, $T(n)=O(n log n)$ \\
+	Using the Master Theorem, $T(n)=O(n \log n)$ \\
 	Using the recursion tree method: \\
 	
 	
@@ -172,7 +172,7 @@ If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily com
 The $2T(\frac{n}{2})$ term is the split time.\\
 The $n$ term represents the merge time. \\
  
-At the 0th level of the tree, $T(n)$ has to merge 2 leaves, each of size $\frac{n}{2}$. Therefore it takes $n$ time to combine on that level. At each level, the time to combine is still $n$, because there are twice as many leaves, but each leaf has half the size. There are $logn$ levels of the tree, and each level has a combine time of $n$, so $T(n) = O(n \log n)$.
+At the 0th level of the tree, $T(n)$ has to merge 2 leaves, each of size $\frac{n}{2}$. Therefore it takes $n$ time to combine on that level. At each level, the time to combine is still $n$, because there are twice as many leaves, but each leaf has half the size. There are $\log n$ levels of the tree, and each level has a combine time of $n$, so $T(n) = O(n \log n)$.
 
 	\vspace{5mm}
 	
@@ -209,12 +209,49 @@ $ T(n) = O(n)$ \\
 \end{enumerate}
 \end{problemparts}
 
+
+
+
 \problem  % Problem 3
 
 \begin{problemparts}
-\problempart Part a % Problem 3a
-\problempart Part b % Problem 3b
+\problempart Peak squares in unbalanced arrays.
+
+\begin {enumerate}
+	\item If we know the color of $A[0][k]$ and $A[n-1][k]$ and the colors of the four corners of $A$, then we can find a smaller sized unbalanced sub-array of $A$. To do this, we must consider two cases.
+	\begin {itemize}
+		\item If the colors at $A[0][k]$ and $A[n-1][k]$ are {\bf the same}, then we choose the corners from the side of $A$ with different colors (this could be either the left corners or right corners). Now we have a sub-array with exactly one corner that is a different color.
+		
+		\item If the colors at $A[0][k]$ and $A[n-1][k]$ are {\bf different}, then we choose the corners from the side of $A$ with the matching colors. Now we have a sub-array with exactly one corner that is a different color.
+	
+	\end {itemize}
+
+	\item If we choose $k=\frac{n}{2}$, then we can divide the array $A$ into an unbalanced sub-array with width $\frac{n}{2}$ and height $n$. We can then divide in half vertically, producing a square, unbalanced sub-array with width $\frac{n}{2}$ and height  $\frac{n}{2}$. If we repeat this process recursively, we will eventually have a 2x2 unbalanced subarray, which is necessarily a peak square.
+	
+	
+	\item $T(n)= T(\frac{n}{2}) + O(1) $ \\
+	At each step, the algorithm reduces the size of the array to $\frac{1}{2}$ it's previous size. Each recursive step takes $O(1)$ time, and there will be $\log_2n$ recursive steps required to reach a 2x2 array. Therefore, the algorithm takes $O(\log n)$ time.
+
+
+\end {enumerate}
+
+\problempart
+
+\begin{enumerate}
+
+	\item First, note that $A[0]$ and $A[n-1]$ are an adjacent pair of array entries and $A[k]$ and $A[k+1]$ are another adjacent pair of array entries. If we find the maximum entry $x$ of these 4 entries, we also know that there is an adjacent entry (either before or after in the array) that is necessarily smaller than $x$. Now consider the 2 remaining entries (we eliminate $x$ and the adjacent entry from our original four). For example, if our $x=A[k]$, then the adjacent entry is $A[k+1]$, so we are left with $A[0]$ and $A[-1]$. Let $y$ be the entry from these two remaining entries that is closest to $x$. Then, on the circular sub-array A[x:y] inclusive, we are guaranteed to find a peak.
+
+	\item If we choose $k$ such that $k=\frac{n}{2}$, we can divide our search space in half during the divide step. We are guaranteed to find a peak on the new search space, which has $\frac{n}{2}$. The divide step takes $O(1)$ time, because we are just finding the maximum of four array entries during this step. Once we have a subarray with size $n\leq4$, we will find the maximum entry directly. There will be order $\log_2 n$ divide steps to reduce the array to this size. Therefore, this algorithm will find a peak in $O(\log n)$ time.
+	
+\end{enumerate}
+
 \end{problemparts}
+
+
+
+
+
+
 
 \section*{Part B}
 
@@ -223,9 +260,9 @@ $ T(n) = O(n)$ \\
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
-\problempart Part d % Problem 4d
 
-Below is a list of the constants used in runtime analysis for parts (b) and (c):
+
+\problempart Below is a list of the constants used in runtime analysis for parts (b) and (c):
 \begin{itemize}
 	\item $n$, the total number of articles
 	\item $m$, the total number of words in each article (assumed to be the same for every article)
@@ -259,7 +296,7 @@ The implementation of {\bf \functionb} from {\bf part(b)} is outlined below:
 			\item $\theta(m)$ to compute the magnitude of one TFIDF dictionary.
 			\item $\theta(m)$ to compute the magnitude of the other TFIDF dictionary.
 		\end{itemize}
-	\item The angle between every article and the query article is stored in a list. There are $n-1$ elements in the list, so it will take $O(n \cdot log_2n)$ time to sort this list.
+	\item The angle between every article and the query article is stored in a list. There are $n-1$ elements in the list, so it will take $O(n \cdot \log_2n)$ time to sort this list.
 	\item To return the $k$ closest articles from the sorted list, it will take $\theta(k)$ time.
 \end{enumerate}
 
@@ -273,7 +310,7 @@ The implementation of {\bf \functionc} from {\bf part(c)} is outlined below:
 	\item For each {\textit unique} term in the corpus, the inverse-document-frequency is computed and added to a new {\bf corpusIDFDict} dictionary. This takes $\theta(w)$ time, because the code only considers unique words, without repeats.
 	\item Parse the user's query and remove repeated words. This takes $\theta(l)$ time.
 	\item For each article, add up the TFIDF scores for each distinct word in the query to get a total score. This takes $\theta(nq)$ time, because there are $n$ articles and $q$ words in the query that must be retrieved from an article's TFIDF dictionary.
-	\item It takes $O(n \cdot log_2n)$ time to sort the list of $n$ articles by their TFIDF score.
+	\item It takes $O(n \cdot \log_2n)$ time to sort the list of $n$ articles by their TFIDF score.
 	\item It takes $\theta(k)$ time to take the $k$ best non-negative articles from the sorted list of articles.
 \end{enumerate}
 
