@@ -21,7 +21,7 @@
 \newcommand{\myname}{Milo H. Knowles}
 
 %define collaborators here
-\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Kacie Bawiec}
+\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Kacie Bawiec, Wala'a Alkhanaizi}
 
 \newcommand{\tabT}{\hspace*{\tabUnit}}
 
@@ -33,7 +33,6 @@
 \handout{Problem Set \theproblemsetnum}{September 13, 2016}
 
 \textbf{All parts are due {\bf \partaduedate} at {\bf 11:59PM}}.
-\textbf{asfjsdlkfjkldsjf}
 
 \setlength{\parindent}{0pt}
 
@@ -111,8 +110,16 @@
 \problem  % Problem 1
 
 \begin{problemparts}
-\problempart Part a  % Problem 1a
-\problempart Part b  % Problem 1b
+\problempart In order of increasing growth: $$[(log_2n^2)^2, n, nlogn,  n^2, 2^n ]$$
+First,
+$$(logn^2)^2 = 4(logn)^2$$ which grows more slowly than $n$ because generally the logarithm of a number is less than the number itself. This also explains why $nlogn$ is before $n^2$. An expression with a growing variable in the exponent will be bigger than an expression with a constant exponent, so $O(2^n)$ is the largest.
+
+\problempart In order of increasing growth: $$[f_1, f_6, f_3, f_5, f_2, f_4]$$
+First, some simplifications:
+$$f_1 = log((logn)^3) = 3log(logn)$$
+$$f_5 = log(3(n^{n^3})) = n^3log(3n)$$
+$f_1$ has the smallest order of growth because it is a log of a log. 
+
 \problempart Part c  % Problem 1c
 \end{problemparts}
 
@@ -191,12 +198,25 @@ The implementation of {\bf \functionc} from {\bf part(c)} is outlined below:
 	\item It takes $\theta(k)$ time to take the $k$ best non-negative articles from the sorted list of articles.
 \end{enumerate}
 
-
-
-
-
+\vspace{5mm}
 
 \problempart Part e % Problem 4e
+\begin{enumerate}
+	\item Although the {\bf get-relevant-articles-tf-idf} method is clearly superior to the {\bf get-relevant-articles-doc-dist} at returning relevant articles, both methods show cases where they return more intuitive results.
+	\begin{itemize}
+		\item The document-distance method for finding relevant articles is advantageous when the corpus of articles is relatively homogenous in terms of topic. If all articles focus on a similar topic, say astronomy, then words like "planet" and "telescope" might occur in every article, and therefore be ignored by the TF-IDF method?this is bad for finding relevant documents. However, the document distance would not ignore these words, and do a better job of providing similar articles.
+		
+		\item In general, TF-IDF is useful for searching through a diverse set of documents to find results that are tailored to the 			query article. This is because TF-IDF gives common words a low weight, and ignores words that appear in every article (and, 		the, with, because). It gives high weight to the words in each article that are unique. 
+
+		\end{itemize}
+
+	\item Generally, longer documents will have higher word frequencies for words that are related to the topic of that article. These document-specific words are also likely to have a high TF-IDF weight, because they are unique to that article. Therefore, they will make a large contribution computed "relevance" of the document. So long documents will tend to dominate search results. We could modify the TF-IDF calculation so that word-frequencies are normalized based on the total number of distinct words $N$ in an article. For each word $w$ in an article which occurs with frequency $F_w$, the TF-IDF calculation would look like:
+	$$ TFIDF_w = (F_w \cdot IDF_w) / N $$
+	\item stuff
+\end{enumerate}
+
+
+
 \end{problemparts}
 
 \end{problems}
