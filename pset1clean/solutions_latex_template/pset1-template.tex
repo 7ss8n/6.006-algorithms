@@ -118,15 +118,39 @@ $$(logn^2)^2 = 4(logn)^2$$ which grows more slowly than $n$ because generally th
 First, some simplifications:
 $$f_1 = log((logn)^3) = 3log(logn)$$
 $$f_5 = log(3(n^{n^3})) = n^3log(3n)$$
-$f_1$ has the smallest order of growth because it is a log of a log. 
+$f_1$ has the smallest order of growth because it is a log of a log. $f_6$ is the next smallest because it has a constant exponent. $f_3$ is raised to the power $logn$ which grows more slowly than the $n^3$ term of  $f_5$. $f_2$ has an exponent that grows with $n$, but $f_4$ is biggest because it has two layers of exponents, one of which is constant, and one of which grows with n.
 
-\problempart Part c  % Problem 1c
+\problempart In order of increasing growth: $$[f_5, f_1, f_2, f_4, f_3]$$
+
+If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily compared. Ranking the exponents from smallest to largest will give the correct order for the functions in this group. $$ 5n < 6n < n^4 < 3^n < 3^{n+1} $$
 \end{problemparts}
+
+
 
 \problem  % Problem 2
 
 \begin{problemparts}
-\problempart Part a % Problem 2a
+
+\problempart Solving Recurrences
+\begin{enumerate}
+	\item $T(n) = 8T(\frac{n}{3})+ n^2 = O(n^2)$
+	\item $T(n) = 10T(\frac{n}{3})+ n^2 = O(n^{log_3 10})$
+	\item $T(n) = 2T(\frac{n}{2})+ n$ \\
+	Using the Master Theorem, $T(n)=O(n log n)$ \\
+	Using the recursion tree method:
+	
+	\vspace{5mm}
+	
+	\item $T(n) = T(\frac{n}{2})+ O(n)$ \\
+	Expanding the recurrence: \\
+	$T(n) = T(\frac{n}{2}) + O(n)$ \\	$T(n) = T(\frac{n}{2}) + cn $\\
+	$T(n) = T(\frac{n}{4}) + c\frac{n}{2} cn$ \\	$T(n) = T(\frac{n}{8}) + c\frac{n}{4} + c\frac{n}{2} + cn $\\
+	$...$ \\
+	$T(n) = T(1) + cn(1 + \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + ... + \frac{1}{2^i})$ \\	This sum has a finite value, so $T(n) = O(n)$.
+
+\end{enumerate}
+
+
 \problempart Part b % Problem 2b
 \end{problemparts}
 
