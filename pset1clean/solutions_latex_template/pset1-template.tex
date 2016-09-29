@@ -212,7 +212,19 @@ The implementation of {\bf \functionc} from {\bf part(c)} is outlined below:
 
 	\item Generally, longer documents will have higher word frequencies for words that are related to the topic of that article. These document-specific words are also likely to have a high TF-IDF weight, because they are unique to that article. Therefore, they will make a large contribution computed "relevance" of the document. So long documents will tend to dominate search results. We could modify the TF-IDF calculation so that word-frequencies are normalized based on the total number of distinct words $N$ in an article. For each word $w$ in an article which occurs with frequency $F_w$, the TF-IDF calculation would look like:
 	$$ TFIDF_w = (F_w \cdot IDF_w) / N $$
-	\item stuff
+	
+	
+	\item The top 3 searches for "Apple" using TF-IDF are: \\
+	'Apple Inc', 1.2453550760561019 \\
+	'Macintosh', 1.4112032100984244 \\
+	'Pear', 1.4620266501066561 \\ \\
+	And the top 3 searches for "Apple" using document-distance are: \\
+	'Apple Inc', 0.4488082903602776 \\
+	'Banana', 0.4518146534769454 \\
+	'Tomato', 0.4557968967347264 \\
+	
+	Here, document-distance performs better, because it returns two fruits, whereas TF-IDF returns only one fruit. To improve TF-IDF, we could remove all instances of the title word, "Apple," from the article. This would remove the ambiguity surrounding the word "apple," and leave behind words that describe the characteristics of an apple (the fruit). Therefore, a search would find documents that have similar descriptors (other fruit articles), and not just articles the same title.
+	
 \end{enumerate}
 
 
