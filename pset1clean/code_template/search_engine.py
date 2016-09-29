@@ -238,20 +238,13 @@ class SearchEngine(object):
 		for word in docFreqDict.keys():
 			corpusIDFDict[word] = math.log((float(numArticles) / float(docFreqDict[word])))
 
-		#print(corpusIDFDict)
 		#now compute the angle between every article and the query article, and store it as a title/document-distance object
 		titleDistPairs = []
-		#print wordFreqDictDict[title]
 
-		counter = 0
 		for other_title in self.corpus.keys():
-
-			#don't compare the query article to itself
-			if other_title == title:
+			if other_title == title: #don't compare the query article to itself
 				continue
-
 			else:
-				#print wordFreqDictDict[title]
 				angle = computeAngleBetweenWFIDFDicts(wordFreqDictDict[title],wordFreqDictDict[other_title],corpusIDFDict)
 				titleDistPairs.append(titleDistPair(other_title,angle))
 
@@ -361,11 +354,6 @@ class SearchEngine(object):
 if __name__ == '__main__':
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
-
-	result = e.get_relevant_articles_tf_idf('Berry',5)
-	#print(result)
-
-	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
 	while True:
@@ -380,5 +368,4 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
-
-	"""
+	
