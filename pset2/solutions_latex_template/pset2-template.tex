@@ -217,12 +217,12 @@ The height of the tree is $\log_2 m$, and each layer takes $\theta(mn)$ time, so
 \problempart The following is an $O(n^2)$ algorithm that computes Bowser's final rank. Consider the pseudocode below:
 \bigskip
 
-losetimes =  \{ \}  \# this dictionary stores a key for each player, and a value for their losetime
+losetimes =  \{ \}  \# this dict stores players as keys, and each player's "lose-time" as a value
 
 \begin{tabbing}
 for \= s in competitors: \\
 	\> for \= f in competitors: \\
-		\>\> min\_losetime = 1,000,000 \# initialized with a really high integer \\
+		\>\> min\_losetime = 1,000,000,000  \# initialized with a really high integer \\
 		\>\> if \= s == f:\\
 			\>\>\> continue\\
 		\>\>else:\\
@@ -232,14 +232,14 @@ for \= s in competitors: \\
 					\>\>\>\>\>min\_losetime = time\\
 	\>losetimes[s] = min\_losetime\\
 	\\
-	\# increment bowser's rank every time a competitor is found with a longer finish time (meaning that they outlasted bowser)
+	\# increment bowser's rank every time a competitor is found with a longer finish time (meaning they outlasted bowser)
 	bowser\_rank = 1\\
-	for\=time in losetimes.values():\\
+	for \=time in losetimes.values():\\
 		\>if \=time $>$ losetimes['bowser']:\\
 			\>\>bowser\_rank += 1\\
-
 \end{tabbing}
-
+\smallskip
+This algorithm will take $O(n^2)$ time because it takes $O(n)$ time to compute the minimum lose-time for each competitor, and there are $n$ competitors. 
 
 
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
