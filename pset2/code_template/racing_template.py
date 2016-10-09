@@ -1,6 +1,7 @@
 """Main solution file for F1 Kart Racing."""
 
-import heapq
+import heapq as h
+from operator import itemgetter
 
 
 def compare(a, b):
@@ -35,6 +36,9 @@ class Fraction(object):
     def __str__(self):
         """Return textual representation of the fraction."""
         return str(self.num) + "/" + str(self.den)
+
+    def __repr__(self):
+        return str(float(self.num)/self.den)
 
 
 def losetime(p_s, v_s, p_f, v_f, L):
@@ -89,11 +93,39 @@ def remove(i, ahead, behind):
     behind_i = behind[i]
     ahead_i = ahead[i]
 
+    #remove the elements that are not possible any more
+    del ahead[i]
+    del ahead[behind_i]
+    del behind[ahead_i]
+    del behind[i]
+
+
     #the player behind i will now be behind the player ahead of i
     behind[ahead_i] = behind_i
 
     #the player ahead of i will now be ahead of the player behind i
     ahead[behind_i] = ahead_i
+    return ((i,ahead_i),(behind_i,ahead_i))
+
+def buildDictionaries(position):
+    """
+    Takes in a list of positions for players i=0 to i=N-1
+    Returns: the ahead and behind dictionaries (ahead, behind).
+    Runs in O(nlgn) time
+    """
+    ahead = {}
+    behind = {}
+
+    position_tuples = [(j,position[j]) for j in range(len(position))]
+
+    #sort the position list
+    sorted_position = sorted(position_tuples, key = itemgetter(1))
+
+    #now build the ahead and behind dictionary
+    for i in range(len(sorted_position)):
+        ahead[sorted_position[i][0]] = sorted_position[(i+1) % len(position)][0] #the mod makes the list wrap around to the front
+        behind[sorted_position[i][0]] = sorted_position[i-1][0] #at index 0, the behind index is -1, which is correct
+    return (ahead, behind)
 
 
 def rank(N, L, velocity, position):
@@ -118,6 +150,86 @@ def rank(N, L, velocity, position):
         inclusive.
     """
     # Implement this method for part (f).
-    pass
+
+    #build the ahead and behind dictionaries
+    ahead, behind = buildDictionaries(position)
+
+    #for each pair of players in ahead, compute the losetime for the player in front
+    #if the player in front is moving faster, don't add this to the array of losetimes
+    #(losetime, (a,b))
+
+    losetimes = []
+    for playerA,playerB in ahead.items():
+        if velocity[playerA] <= velocity[playerB]: #this means that playerA can never pass playerB
+            continue
+        else: #player A can pass player B at some time
+            #compute when playerA will pass player B
+            l_time = losetime(position[playerB], velocity[playerB], position[playerA], velocity[playerA], L)
+            losetimes.append((l_time,(playerA,playerB)))
+
+    #transform the losetimes list into a heap
+    h.heapify(losetimes)
+
+    #events stores tuples of the form (Losetime, (PlayerA, PlayerB))
+    #where Losetime is the time it takes for playerA to pass playerB
+    #events will be added to this list in chronological order
+    events = []
+
+    #if an event is invalidated, store it in the event_impossible dict as True
+    event_impossible = {}
+
+    while len(losetimes) >= 1:
+        min_losetime = h.heappop(losetimes) #has structure (Fraction, (a,b)) where a passes b
+
+        try: #see if the event is known to be impossible due to the game state
+            test = event_impossible[min_losetime[1]]
+        except: #if not, then the event can happen and should be added to events
+            events.append(min_losetime)
+
+        #remove the player that was passed, update ahead and behind dicts
+        #also store the event that will need to be removed from the heap
+        #and the event that needs to be added to the heap
+
+        try:
+            rm_event, add_event = remove(min_losetime[1][1], ahead, behind)
+
+            #add the event that must be removed to the event_impossible dictionary
+            event_impossible[rm_event] = True
+
+            #add the new case if it is possible (behind player can overtake front player)
+            p1 = add_event[0]
+            p2 = add_event[1]
+
+            if velocity[p1] > velocity[p2]:
+                l_time = losetime(position[p2], velocity[p2], position[p1], velocity[p1], L)
+                element_to_add = (l_time, (p1,p2)) #this element is to be added to the heap
+
+                #add the new possible event to the heap
+                h.heappush(losetimes, element_to_add)
+
+        except:
+            pass
+
+    #get the rank of competitor zero
+    for i in range(len(events)):
+        if events[i][1][1] == 0: #if the event is Player 0 being passed
+            return N-i
+    
+    #if competitor zero was never passed, he/she/ze/zir must have won!
+    return 1
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
 
 

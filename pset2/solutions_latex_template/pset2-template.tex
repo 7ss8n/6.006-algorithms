@@ -244,7 +244,19 @@ This algorithm will take $O(n^2)$ time because it takes $O(n)$ time to compute t
 
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
-\problempart Part e % Problem 4e
+
+
+\problempart We assume that Charlie does pass Bowser. In this case, we must consider 3 additional events:
+\begin{itemize}
+\item Bowser passes Alice before Charlie passes Bowser. This is only possible if $v_b > v_a$. As a result, Alice is removed from the race and Bowser is removed from the race.
+\item Deborah passes Charlie after Charlie passes Bowser. This is only possible if $v_d > v_c$. This results in Bowser being removed and then Charlie being removed from the race.
+\item Alice passes Deborah. This will happen if $v_a > v_d$. This means that Bowser and then Deborah will be removed from the race.
+\item We can remove the possibility of Bowser passing Alice or Deborah from consideration, because Charlie passes Bowser and removes him from the race first.
+
+\end{itemize}
+
+
+
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \end{problemparts}
 
