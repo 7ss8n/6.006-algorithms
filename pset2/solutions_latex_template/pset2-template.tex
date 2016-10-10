@@ -9,6 +9,7 @@
 %tree building packages
 \usepackage{tikz}
 \usetikzlibrary{trees}
+\usepackage{amsmath}
 
 \input{macros}
 
@@ -161,29 +162,56 @@ $\implies$ $f(n)=n^2$ is one possible $f(n)$.
 
 %TODO: replace all nodes with arrays!
 
-\begin{tikzpicture}[level distance=1.5cm,
+\begin{tikzpicture}[level distance=4cm,
   level 1/.style={sibling distance=3cm},
   level 2/.style={sibling distance=1.5cm}]
-  \node {$T(n)$}
-     child {node {$T(\frac{n}{2})$}
-     child {node {$...$}   
-     child {node {$T(1)$}}
-     child {node {$T(1)$}}
+  \node {\[
+  \begin{bmatrix}
+    1 \\ 2 \\ 3 \\ 4 \\ 4 \\ 5 \\ 5 \\ 6 \\ 8 \\ 10 \\ 19 \\ 30
+  \end{bmatrix}
+\]}
+     child {node {\[
+  \begin{bmatrix}
+    1 \\ 2 \\ 3 \\ 4 \\ 5 \\ 6
+  \end{bmatrix}
+\]
+}
+     child {node {\[
+  \begin{bmatrix}
+    1 \\ 3 \\ 4
+  \end{bmatrix}
+\]}   
     }
-      child {node {$...$}
-      child {node {$T(1)$}}
-      child {node {$T(1)$}}}
+      child {node {\[
+  \begin{bmatrix}
+    2 \\ 5 \\ 6
+  \end{bmatrix}
+\]
+}}
     }
-     child {node {$T(\frac{n}{2})$}
-     child {node {$...$}
-     child {node {$T(1)$}}
-     child {node {$T(1)$}}}
-     child {node {$...$}
-     child {node {$T(1)$}}
-     child {node {$T(1)$}}
+     child {node {\[
+  \begin{bmatrix}
+    4 \\ 5 \\ 8 \\ 10 \\ 19 \\ 30
+  \end{bmatrix}
+\]}
+     child {node {\[
+  \begin{bmatrix}
+    4 \\ 5 \\ 19
+  \end{bmatrix}
+\]}
+     }
+     child {node {
+\[
+  \begin{bmatrix}
+    8 \\ 10 \\ 30
+  \end{bmatrix}
+\]
+}
      } 
      };
 \end{tikzpicture} \\
+
+
 
 \bigskip
 \bigskip
