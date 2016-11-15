@@ -111,7 +111,7 @@ def conservative_latencies(N, L):
                     #update the parent array
                     parent[u][v] = parent[k][v]
 
-                #If k is not equal to u or v, consider 2 cases:
+                #If k is not equal to u or v, consider 2 cases where the second shortest path could be improved using intermediate node k
                 if (k != u and k != v):
                     #Case 1: consider adding 2SP from u to k and 1SP from k to v
                     if B[0][u][k]+A[0][k][v] < B[0][u][v]:
@@ -134,8 +134,34 @@ def conservative_latencies(N, L):
             shortestPathDict[(u,v)] = path
 
     print(shortestPathDict)
-    print(parent)
-    printMatrix3D(B[0])
+    #print(parent)
+    #printMatrix3D(B[0])
+
+
+    # now determine the shortest nontrivial cycle around each vertex in the graph
+    shortestCycleDict = {}
+    for startVertex in range(N):
+        bestCycleLength = float("inf") #if no cycle is found, then a cycle will just have length infinity
+
+        # for every other vertex, see if going to that vertex and back will result in a better cycle
+        for otherVertex in range(N):
+            if ((A[0][startVertex][otherVertex] + A[0][otherVertex][startVertex] < bestCycleLength) and (startVertex != otherVertex)):
+                bestCycleLength = A[0][startVertex][otherVertex] + A[0][otherVertex][startVertex]
+
+        # add the shortest cycle to the dictionary
+        shortestCycleDict[startVertex] = bestCycleLength
+
+    print("Cycle dict")
+    print(shortestCycleDict)
+    #For each vertex in every shortest path in A, see if adding a single nontrivial cycle will improve the second best path in B
+    for i,j in shortestPathDict:
+        shortestPath = shortestPathDict[(i,j)] # a sequence of vertices
+
+        # see if the shortest path plus a cycle at some vertex v improves our SBP
+        for v in shortestPath:
+            if A[0][i][j] + shortestCycleDict[v] < B[0][i][j]:
+                B[0][i][j] = A[0][i][j] + shortestCycleDict[v]
+
     return B[0]
 
 
