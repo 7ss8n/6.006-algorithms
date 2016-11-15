@@ -165,7 +165,11 @@ In this case, if Speedy arrives at vertex C, he will enter a never-ending loop f
 
 \problempart Similar to Part B, we can use an adapted version of the Bellman Ford algorithm to find the highest-weight path to every node in the graph. We can start at any arbitrary Normally, the algorithm will find the highest-weight path to every node in $\abs{V}-1$ iterations. However, if on the $Vth$ iteration we can still perform relaxations on on the graph and the highest weight of vertices continues to increase, this means that there must be positive-weight cycles in the graph. 
 
-If there is a positive weight cycle, any node that is reachable from that positive weight cycle will continue to increase it's weight as Bellman-Ford runs. On the $Vth$ iteration of Bellman-Ford, start storing all of 
+If there is a positive weight cycle, any node that is reachable from that positive weight cycle will continue to increase it's weight as Bellman-Ford runs. On the $Vth$ iteration of Bellman-Ford, start storing all of the nodes whose weight increases in a dictionary. Do Bellman-Ford another $\abs{v}-1$ times. Every time a nodes weight increases, check if it is already in the dictionary, and if not, add it.
+
+After $\abs{v}-1$ more iterations of Bellman-Ford, every node that is reachable from a positive-weight cycle will have been identified. Speedy could be at any one of these nodes.
+
+The overall runtime of this algorithm is $O(VE)$, because we ran $2\abs{v}-2$ iterations through Bellman-Ford.
 
 \end{problemparts}
 
@@ -198,8 +202,13 @@ The algorithm takes $O(V + E)$ time to build our augmented graph, and $O(V\log V
 \problem  % Problem 3
 
 \begin{problemparts}
-\problempart Part a % Problem 3a
-\problempart Part b % Problem 3b
+\problempart Let $s$ be the vertex of the starting configuration, and $f$ be the solved cube configuration. Our graph is unweighted, so we can find a shortest path in $O(V + E)$ time using a breadth-first-search. To find the actual sequence of moves that achieves the fastest solution, start at $f$ and retrace the steps of the breadth-first-search using parent pointers until $s$ is found, filling an array of moves from back to front. This will take $O(V)$ time, so the overall runtime is $O(V+E)$.
+
+
+\problempart We run a breadth-first-search from every vertex in $G$, which will give us the shortest path from every vertex to every other vertex. We must do $V$ searches that each take $O(V+E)$ time. This gives a total runtime of $O(V^2 + VE)$. However, because this is a very dense graph, $E >> V$, so the $V^2$ term can be ignored and our runtime simplifies to $O(VE)$.
+
+To find the shortest path from some $c_1$ to $c_2$, trace back parent pointers from $c_2$ to $c_1$, which will take $O(k)$ time since we know that the path has length $k$.
+
 \end{problemparts}
 
 \section*{Part B}
@@ -208,6 +217,12 @@ The algorithm takes $O(V + E)$ time to build our augmented graph, and $O(V\log V
 \begin{problemparts}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
+
+-to update b:
+	-take min of x->y (2) + y->z (2)     |          x->y(1) + y -> z (2)     | x->y(2)  + y->z (1)
+
+
+
 \end{problemparts}
 
 \end{problems}
