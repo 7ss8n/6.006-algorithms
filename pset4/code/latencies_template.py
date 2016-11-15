@@ -72,28 +72,69 @@ def conservative_latencies(N, L):
     """
     # YOUR CODE HERE
     A = [[[0 for x in range(N)] for y in range(N)] for z in range(N+1)]
-    B = [[[0 for x in range(N)] for y in range(N)] for z in range(N+1)]
+
+    #initialize the second-best matrix B to start out with infinity for every distance
+    B = [[[float("inf") for x in range(N)] for y in range(N)] for z in range(N+1)]
     
+    # parent[i][j] is the node directly before j in the path from i to j
+    parent = [[0 for x in range(N)] for y in range(N)]
+
     #NOTE: order of indexing is z, x, y
     # intialize A with the weights of edges that we know
     for x in range(N):
         for y in range(N):
             A[0][x][y] = L(x,y)
-            B[0][x][y] = L(x,y)
+
+            #also initialize our parent array
+            if x == y or L(x,y) == float("inf"):
+                parent[x][y] = -1
+            else:
+                parent[x][y] = x
+
 
     #printMatrix3D(A[0])
     for k in range(N):
         for u in range(N):
             for v in range(N):
-                # if this is true, we should update A
+
+                # if using the intermediate node produces a shorter path, update the shortest path in A
                 if A[0][u][k]+A[0][k][v] < A[0][u][v]:
+
+                    #If the previous best path from u to v is better than our second best path from u to v,
+                    #update B to have the previous shortest path from A
+                    if A[0][u][v] < B[0][u][v]:
+                        B[0][u][v] = A[0][u][v]
+
+                    # Now update the shortest path in A
                     A[0][u][v] = A[0][u][k]+A[0][k][v]
 
+                    #update the parent array
+                    parent[u][v] = parent[k][v]
 
-    
+                #If k is not equal to u or v, consider 2 cases:
+                if (k != u and k != v):
+                    #Case 1: consider adding 2SP from u to k and 1SP from k to v
+                    if B[0][u][k]+A[0][k][v] < B[0][u][v]:
+                        B[0][u][v] = B[0][u][k]+A[0][k][v]
 
+                    #Case 2: consider adding 1SP from u to k and 2SP from k to v
+                    if A[0][u][k]+B[0][k][v] < B[0][u][v]:
+                        B[0][u][v] = A[0][u][k]+B[0][k][v]
 
+    # now build the shortest paths from each u to v
+    shortestPathDict = {}
+    for u in range(N):
+        for v in range(N):
+            path = []
+            start = u
+            end = v
+            while end != start:
+                path.append(parent[start][end])
+                end = parent[start][end]
+            shortestPathDict[(u,v)] = path
 
+    print(shortestPathDict)
+    print(parent)
     printMatrix3D(B[0])
     return B[0]
 
