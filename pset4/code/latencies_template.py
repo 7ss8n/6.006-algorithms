@@ -6,7 +6,6 @@
 #
 # PART A: Fill in the code for part a
 # 
-
 from collections import deque
 
 def printMatrix3D(m):
@@ -64,14 +63,17 @@ def reconstructPaths(nextMatrix, N):
 			start = u
 			end = v
 
+            # if no path, return empty list
 			if nextMatrix[u][v] == None:
 				return []
 			path = [u]
 
+            #go through the path from start to finish
 			while start != end:
 				start = nextMatrix[start][end]
 				path.append(start)
 
+            # add to the dictionary of all paths
 			shortestPathDict[(u,v)] = path
 
 	return shortestPathDict
@@ -116,7 +118,7 @@ def conservative_latencies(N, L):
     	for u in range(N):
     		for v in range(N):
     			
-    			# if k is the start or end node, do nothing
+    			# if k is the start or end vertex, do nothing
     			if k==u or k==v:
     				pass
 
@@ -124,13 +126,13 @@ def conservative_latencies(N, L):
     				# if going through k could improve our best path
     				if A[0][u][k]+A[0][k][v] < A[0][u][v]:
 
-    					# update B
+    					# update B: could be the previous value in B, the prev value in A, 1BP from u->k and 2BP from k->v, or 2BP from u->k and 1BP from k->v
     					B[0][u][v] = min(B[0][u][v], A[0][u][v], A[0][u][k]+B[0][k][v], B[0][u][k]+A[0][k][v])
 
-    					# update A
+    					# update A to the new shortest path length
     					A[0][u][v] = A[0][u][k]+A[0][k][v]
 
-    					# now the node right before v in the best path from u->v is the node right before v in the best path from k->v
+    					# now the vertex right after u in the best path from u->v is the vertex right after u in the best path from u->k
     					next_matrix[u][v] = next_matrix[u][k]
 
     				# if going through k would result in a path equal to our best path
@@ -142,24 +144,25 @@ def conservative_latencies(N, L):
 
     				# if going through k is worse than our current best path
     				elif A[0][u][k]+A[0][k][v] > A[0][u][v]:
-    					# update B
+
+    					# update B: must consider case where B is path from u->v using intermediate vertex k
     					B[0][u][v] = min(B[0][u][v], A[0][u][k]+B[0][k][v], B[0][u][k]+A[0][k][v], A[0][u][k]+A[0][k][v])
 
     #build a dictionary of shortest paths to iterate through, looking for cycles
     shortestPathDict = reconstructPaths(next_matrix, N)
 
     for i,j in shortestPathDict:
-    	# see if the shortest path plus a cycle at some vertex v improves our SBP
-    	shortestPath = shortestPathDict[(i,j)] # a sequence of vertices
-    	for v in shortestPath:
-    		if A[0][i][j] + B[0][v][v] < B[0][i][j]:
-    			B[0][i][j] = A[0][i][j] + B[0][v][v]
+        # see if the shortest path plus a cycle at some vertex v improves our SBP
+        shortestPath = shortestPathDict[(i,j)] # a sequence of vertices
+        for v in shortestPath:
+            if A[0][i][j] + B[0][v][v] < B[0][i][j]:
+                B[0][i][j] = A[0][i][j] + B[0][v][v]
 
     return B[0]
 
 
-def main():
-    pass
+# def main():
+#     pass
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
