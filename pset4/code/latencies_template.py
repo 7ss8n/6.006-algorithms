@@ -1,3 +1,5 @@
+# cleaner latencies template
+
 ###################################
 ##########  PROBLEM 4-4 ###########
 ###################################
@@ -8,9 +10,12 @@
 from collections import deque
 
 def printMatrix3D(m):
-    for row in m:
-        print(row)
-    print("\n")
+	"""
+	Helper function to print out matrices in a nice way.
+	"""
+	for row in m:
+		print(row)
+	print("\n")
 
 
 def latencies(N, L):
@@ -39,18 +44,37 @@ def latencies(N, L):
         for y in range(N):
             A[0][x][y] = L(x,y)
 
-    #printMatrix3D(A[0])
-
+    # run floyd-warshal
     for k in range(N):
         for u in range(N):
             for v in range(N):
                 A[0][u][v] = min(A[0][u][v], A[0][u][k]+A[0][k][v])
 
-    #printMatrix3D(A[0])
     return A[0]
 
 
-    
+def reconstructPaths(nextMatrix, N):
+	"""
+	Helper function to reconstruct paths given the next matrix
+	Implementation from: https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm#Path_reconstruction
+	"""
+	shortestPathDict = {}
+	for u in range(N):
+		for v in range(N):
+			start = u
+			end = v
+
+			if nextMatrix[u][v] == None:
+				return []
+			path = [u]
+
+			while start != end:
+				start = nextMatrix[start][end]
+				path.append(start)
+
+			shortestPathDict[(u,v)] = path
+
+	return shortestPathDict
 
 #
 # PART B: Fill in the code for part b
@@ -78,134 +102,64 @@ def conservative_latencies(N, L):
     #initialize the second-best matrix B to start out with infinity for every distance
     B = [[[float("inf") for x in range(N)] for y in range(N)] for z in range(N+1)]
     
-    # parent[i][j] is a list of nodes that could be directly before j in the path from i to j
-    # we have a list in place of a single number to allow for multiple shortest paths
-    parent = [[0 for x in range(N)] for y in range(N)]
+    # initialize next_matrix to have value of Null in each element
+    next_matrix = [[None for x in range(N)] for y in range(N)]
 
-    #create one last array to keep track of when there are multiple best paths
-    numBestPathsArray = [[1 for x in range(N)] for y in range(N)]
-
-    #NOTE: order of indexing is z, x, y
     # intialize A with the weights of edges that we know
     for x in range(N):
-        for y in range(N):
+    	for y in range(N):
             A[0][x][y] = L(x,y)
 
-            #also initialize our parent array
-            if x == y or L(x,y) == float("inf"):
-                parent[x][y] = -1
-            else:
-                parent[x][y] = x
+            next_matrix[x][y] = y
 
-
-    #printMatrix3D(A[0])
     for k in range(N):
-        for u in range(N):
-            for v in range(N):
+    	for u in range(N):
+    		for v in range(N):
+    			
+    			# if k is the start or end node, do nothing
+    			if k==u or k==v:
+    				pass
 
-                # if using the intermediate node produces a shorter path, update the shortest path in A
-                if A[0][u][k]+A[0][k][v] < A[0][u][v]:
+    			else:
+    				# if going through k could improve our best path
+    				if A[0][u][k]+A[0][k][v] < A[0][u][v]:
 
-                    #If the previous best path from u to v is better than our second best path from u to v,
-                    #update B to have the previous shortest path from A
-                    if A[0][u][v] < B[0][u][v]:
-                        B[0][u][v] = A[0][u][v]
+    					# update B
+    					B[0][u][v] = min(B[0][u][v], A[0][u][v], A[0][u][k]+B[0][k][v], B[0][u][k]+A[0][k][v])
 
-                    # Now update the shortest path in A
-                    A[0][u][v] = A[0][u][k]+A[0][k][v]
+    					# update A
+    					A[0][u][v] = A[0][u][k]+A[0][k][v]
 
-                    # now the node right before v in the best path from u->v is the node right before v in the best path from k->v
-                    parent[u][v] = parent[k][v]
+    					# now the node right before v in the best path from u->v is the node right before v in the best path from k->v
+    					next_matrix[u][v] = next_matrix[u][k]
 
-                    #since the path was improved, there is now only ONE shortest path from u->v
-                    numBestPathsArray[u][v] = 1
+    				# if going through k would result in a path equal to our best path
+    				elif A[0][u][k]+A[0][k][v] == A[0][u][v]:
 
-                # if the new path we are considering has the SAME length as our shortest path so far, increment the number of shortest paths
-                elif (A[0][u][k]+A[0][k][v] == A[0][u][v] and (k != u and k != v)):
-                    numBestPathsArray[u][v] += 1
+    					# update B
+    					# if there is a new shortest path of equal length, then the second shortest path length could be the minimum path length
+    					B[0][u][v] = min(B[0][u][v], A[0][u][k]+B[0][k][v], B[0][u][k]+A[0][k][v], A[0][u][v])
 
-                #If k is not equal to u or v, consider 2 cases where the second shortest path could be improved using intermediate node k
-                if (k != u and k != v):
-                    #Case 1: consider adding 2SP from u to k and 1SP from k to v
-                    if B[0][u][k]+A[0][k][v] < B[0][u][v]:
-                        B[0][u][v] = B[0][u][k]+A[0][k][v]
+    				# if going through k is worse than our current best path
+    				elif A[0][u][k]+A[0][k][v] > A[0][u][v]:
+    					# update B
+    					B[0][u][v] = min(B[0][u][v], A[0][u][k]+B[0][k][v], B[0][u][k]+A[0][k][v], A[0][u][k]+A[0][k][v])
 
-                    #Case 2: consider adding 1SP from u to k and 2SP from k to v
-                    if A[0][u][k]+B[0][k][v] < B[0][u][v]:
-                        B[0][u][v] = A[0][u][k]+B[0][k][v]
+    #build a dictionary of shortest paths to iterate through, looking for cycles
+    shortestPathDict = reconstructPaths(next_matrix, N)
 
-    print("Num best paths")
-    print(numBestPathsArray)
-
-
-    # now build the shortest paths from each u to v
-    shortestPathDict = {}
-    for u in range(N):
-        for v in range(N):
-            start = u
-            end = v
-
-            #path is a deque to allow fast appending to left
-            path = deque()
-            while end != start:
-                path.appendleft(end)
-                end = parent[start][end]
-            path.appendleft(start)
-            shortestPathDict[(u,v)] = path
-
-    # print("Shortest path dict")
-    # print(shortestPathDict)
-    #print(parent)
-    #printMatrix3D(B[0])
-
-    # now determine the shortest nontrivial cycle around each vertex in the graph
-    shortestCycleDict = {}
-    for startVertex in range(N):
-        bestCycleLength = float("inf") #if no cycle is found, then a cycle will just have length infinity
-
-        # for every other vertex, see if going to that vertex and back will result in a better cycle
-        for otherVertex in range(N):
-            if ((A[0][startVertex][otherVertex] + A[0][otherVertex][startVertex] < bestCycleLength) and (startVertex != otherVertex)):
-                bestCycleLength = A[0][startVertex][otherVertex] + A[0][otherVertex][startVertex]
-
-        # add the shortest cycle to the dictionary
-        shortestCycleDict[startVertex] = bestCycleLength
-
-    #print("Cycle dict")
-    #print(shortestCycleDict)
-    #For each vertex in every shortest path in A, see if adding a single nontrivial cycle will improve the second best path in B
     for i,j in shortestPathDict:
-        
-        # see if there are multiple shortest paths from i to j, in which case B should also contain the shortest path length
-        if numBestPathsArray[i][j] > 1:
-            B[0][i][j] = A[0][i][j]
-            continue # the value in B can't get any smaller if this is the case
-
-        # see if the shortest path plus a cycle at some vertex v improves our SBP
-        shortestPath = shortestPathDict[(i,j)] # a sequence of vertices
-        for v in shortestPath:
-            if A[0][i][j] + shortestCycleDict[v] < B[0][i][j]:
-                B[0][i][j] = A[0][i][j] + shortestCycleDict[v]
+    	# see if the shortest path plus a cycle at some vertex v improves our SBP
+    	shortestPath = shortestPathDict[(i,j)] # a sequence of vertices
+    	for v in shortestPath:
+    		if A[0][i][j] + B[0][v][v] < B[0][i][j]:
+    			B[0][i][j] = A[0][i][j] + B[0][v][v]
 
     return B[0]
 
 
 def main():
     pass
-    # N = 5
-    # inf = float("inf")
-    # cost_matrix =   [
-    #                     [0,     1,      2,      2,      inf],
-    #                     [1,     0,      inf,    3,      8],
-    #                     [2,     inf,    0,      4,      1],
-    #                     [2,     3,      4,      0,      1],
-    #                     [inf,   8,      1,      1,      0]
-    #                 ]
-    # L = lambda x, y: cost_matrix[x][y]
-
-    # latencies(5, L)
-
-
 
 if __name__ == '__main__':
     main()
