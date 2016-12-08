@@ -2,55 +2,31 @@
 ##########  PROBLEM 5-4 ###########
 ###################################
 
-# def double_kill(ghost1, ghost2, memo = {}, parent = {}):
-#     """
-#     Compute the shortest move sequence which will make both ghosts disappear.
+from operator import itemgetter
+from collections import deque
 
-#     Parameters
-#     ----------
-#     ghost1: []
-#         ordered list of moves which will make ghost1 disappear
-#     ghost2: []
-#         ordered list of moves which will make ghost2 disappear
 
-#     Returns
-#     -------
-#     seq : []
-#         move sequence of minimal length which will make both ghosts disappear
-#     """
+def pp(matrix):
+    for i in range(len(matrix)):
+        print(matrix[i])
 
-#     #base cases
-#     if len(ghost1) == 1 and len(ghost2) == 1:
-#         if ghost1[0]==ghost2[0]:
-#             return 1
-#         else:
-#             return 2
-#     if (len(ghost1) + len(ghost2)) == 1:
-#         return 1
 
-#     #check if subproblem has been solved already
-#     if str((ghost1,ghost2)) in memo:
-#         return memo[str((ghost1,ghost2))]
+def recoverPath2D(moveArray2D):
+    """
+    Starting from last move, follow parent pointers back until we get a parent points to (0,0), which is the start point
+    """
+    currentIndex = (len(moveArray2D)-1, len(moveArray2D[0])-1)
+    print("Start:", currentIndex)
+    moveSeq = deque()
 
-#     #recursive cases
-#     else:
-#         if len(ghost1) == 0:
-#             result = 1 + double_kill(ghost1, ghost2[1:], memo)
+    while currentIndex != (0, 0):
+        moveSeq.appendleft(moveArray2D[currentIndex[0]][currentIndex[1]][1])
+        currentIndex = moveArray2D[currentIndex[0]][currentIndex[1]][2]
+    return list(moveSeq)
 
-#         elif len(ghost2) == 0:
-#             result = 1 + double_kill(ghost1[1:], ghost2, memo)
 
-#         elif ghost1[0] == ghost2[0]:
-#             result = 1 + double_kill(ghost1[1:], ghost2[1:], memo)
 
-#         else:
-#             result = 1 + min(double_kill(ghost1, ghost2[1:], memo), double_kill(ghost1[1:], ghost2, memo))
-
-#         memo[str((ghost1,ghost2))] = result
-#         print("Subproblem:", result)
-#         return result
-# matrix = [[0 for i in ghost1] for j in ghost2]
-def double_kill(ghost1, ghost2, memo = {}):
+def double_kill(ghost1, ghost2):
     """
     Compute the shortest move sequence which will make both ghosts disappear.
 
@@ -66,50 +42,66 @@ def double_kill(ghost1, ghost2, memo = {}):
     seq : []
         move sequence of minimal length which will make both ghosts disappear
     """
-    #print("G1:", ghost1, "G2:", ghost2)
-    #base cases
-    if len(ghost1) == 1 and len(ghost2) == 1:
-        if ghost1[0]==ghost2[0]:
-            return ghost1
-        else:
-            return ghost1+ghost2
 
-    # if either list is empty, just return the other list
-    elif len(ghost1) == 0:
-        memo[str((ghost1,ghost2))] = ghost2
-        return ghost2
+    #initialize empty move array with |ghost1|+1 columns and |ghost2|+1 rows
+    # note: (0,0) is a _ empty starting space
+    
 
-    elif len(ghost2) == 0:
-        memo[str((ghost1,ghost2))] = ghost1
-        return ghost1
+    ghost1 = ['_']+ghost1
+    ghost2 = ['_']+ghost2
 
-    #check if subproblem has been solved already
-    if str((ghost1,ghost2)) in memo:
-        print("Found existing subproblem.")
-        return memo[str((ghost1,ghost2))]
+    moveArray = [[0 for i in range(len(ghost1))] for j in range(len(ghost2))]
+    moveArray[0][0] = (0, '_', (-1,-1))
 
-    #recursive cases: if there are elements left in both lists
-    else:
-        if ghost1[0] == ghost2[0]:
-            result = ghost1[:1] + double_kill(ghost1[1:], ghost2[1:], memo)
+    # fill in the moveArray row by row
+    for i in range(len(ghost2)): # for a given row
+        for j in range(len(ghost1)): # for each element in that row
+            
+            #case 0: i=0 and j=0 means that we're in the starting slot
+            if (i==0 and j==0):
+                continue
+            #case 1: i=0 means that there are no slots above
+            elif i==0:
+                # (Num. moves of left slot +1, letter of this col., index of left slot)
+                moveArray[i][j] = (moveArray[i][j-1][0]+1, ghost1[j], (i,j-1))
 
-        else:
-            take_g1 = ghost1[:1] + double_kill(ghost1[1:], ghost2, memo)
-            take_g2 = ghost2[:1] + double_kill(ghost1, ghost2[1:], memo)
-
-            if len(take_g1) < len(take_g2):
-                result = take_g1
-            else:
-                result = take_g2
-
-        memo[str((ghost1,ghost2))] = result
-        return result
+            #case 2: j=0 means that there are no slots to the left
+            elif j==0:
+                # (Num. moves of above slot +1, letter of this row, indes of above slot)
+                moveArray[i][j] = (moveArray[i-1][j][0]+1, ghost2[i], (i-1, j))
 
 
-res = double_kill(['A','B','B','B'], ['C','B','B','B','B'])
-print(res)
+            else: # consider item to left, item above, and diagonal item (if letter are the same)
+                # consider left, up, diagonal
+                left = moveArray[i][j-1]
+                up = moveArray[i-1][j]
+                
+                if ghost1[j] == ghost2[i]:
+                    diagonal = moveArray[i-1][j-1]
+                    # if we want the left parent
+                    if (left[0] < up[0]) and (left[0] < diagonal[0]):
+                        moveArray[i][j] = (left[0]+1, ghost1[j], (i,j-1))
 
-#
+                    # if we want the above parent
+                    elif up[0] < diagonal[0]:
+                        moveArray[i][j] = (up[0]+1, ghost2[i], (i-1,j))
+
+                    else: #use diagonal
+                        moveArray[i][j] = (diagonal[0]+1, ghost2[i], (i-1,j-1))
+
+                else: # do not consider diagonal
+                    if left[0] < up[0]:
+                        moveArray[i][j] = (left[0]+1, ghost1[j], (i,j-1))
+                    else:
+                        moveArray[i][j] = (up[0]+1, ghost2[i], (i-1,j))
+
+    return recoverPath2D(moveArray)
+
+
+# res = double_kill(['A','B','B','B'], ['C','B','B','B','B'])
+# print(res)
+
+# #
 # PART B: Fill in the code for part b
 #
 
