@@ -222,4 +222,16 @@ def triple_kill(ghost1, ghost2, ghost3):
 
                 else:
                     
+                    parent_i = moveArray[k][i-1][j]
+                    parent_j = moveArray[k][i][j-1]
+                    parent_k = moveArray[k-1][i][j]
+                    parent_jk = moveArray[k-1][i][j-1]
+                    parent_ik = moveArray[k-1][i-1][j-1]
+                    parent_ij = moveArray[k][i-1][j-1]
+                    parent_ijk = moveArray[k-1][i-1][j-1]
+
+
+                    if ghost1[j]==ghost2[i]==ghost3[k]: #ijk is possible
+
+
 
