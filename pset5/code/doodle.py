@@ -123,6 +123,103 @@ def triple_kill(ghost1, ghost2, ghost3):
     seq : []
         move sequence of minimal length which will make all three ghosts disappear
     """
+    ghost1 = ['_']+ghost1
+    ghost2 = ['_']+ghost2
+    ghost3 = ['_']+ghost3
+
+    # [ghost3][ghost2][ghost1] order of indexing
+    moveArray = [[0 for i in range(len(ghost1))] for j in range(len(ghost2)) for k in range(len(ghost3))]
+    moveArray[0][0][0] = (0, '_', (-1,-1,-1))
     
-    raise NotImplementedError
+    for k in len(range(ghost3)):
+        for i in len(range(ghost2)):
+            for j in len(range(ghost1)):
+
+                # ignore the origin 
+                if i==0 and j==0 and k==0:
+                    continue
+
+                # move along a row
+                elif k=0 and i=0:
+                    moveArray[k][i][j] = (moveArray[k][i][j-1][0]+1, ghost1[j], (k, i, j-1)
+
+                # move down a column
+                elif k=0 and j=0:
+                    moveArray[k][i][j] = (moveArray[k][i-1][j][0]+1, ghost2[i], (k, i-1, j)
+
+                # move along depth axis
+                elif i=0 and j=0:
+                    moveArray[k][i][j] = (moveArray[k-1][i][j][0]+1, ghost3[k], (k-1, i, j)
+
+                elif k=0: # building up the front plane
+                    # consider left, up, diagonal
+                    left = moveArray[k][i][j-1]
+                    up = moveArray[k][i-1][j]
+                    
+                    # we can consider diagonal
+                    if ghost1[j] == ghost2[i]:
+                        diagonal = moveArray[k][i-1][j-1]
+                        # if we want the left parent
+                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
+                            moveArray[k][i][j] = (left[0]+1, ghost1[j], (k,i,j-1))
+                        # if we want the above parent
+                        elif up[0] < diagonal[0]:
+                            moveArray[k][i][j] = (up[0]+1, ghost2[i], (k,i-1,j))
+                        else: #use diagonal
+                            moveArray[k][i][j] = (diagonal[0]+1, ghost2[i], (k,i-1,j-1))
+
+                    else: # do not consider diagonal
+                        if left[0] < up[0]:
+                            moveArray[k][i][j] = (left[0]+1, ghost1[j], (k,i,j-1))
+                        else:
+                            moveArray[k][i][j] = (up[0]+1, ghost2[i], (k,i-1,j))
+
+                elif i=0: # building up the top plane as if we were looking down from the top
+                    # consider left, up, diagonal
+                    left = moveArray[k-1][i][j]
+                    up = moveArray[k][i][j-1]
+                    
+                    # we can consider diagonal
+                    if ghost3[k] == ghost1[j]:
+                        diagonal = moveArray[k-1][i][j-1]
+                        # if we want the left parent
+                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
+                            moveArray[k][i][j] = (left[0]+1, ghost3[k], (k-1,i,j))
+                        # if we want the above parent
+                        elif up[0] < diagonal[0]:
+                            moveArray[k][i][j] = (up[0]+1, ghost1[j], (k,i,j-1))
+                        else: #use diagonal
+                            moveArray[k][i][j] = (diagonal[0]+1, ghost1[j], (k-1,i,j-1))
+
+                    else: # do not consider diagonal
+                        if left[0] < up[0]: #use left parent
+                            moveArray[k][i][j] = (left[0]+1, ghost3[k], (k-1,i,j))
+                        else: # use above parent
+                            moveArray[k][i][j] = (up[0]+1, ghost1[j], (k,i,j-1))
+
+                elif j=0: # build up the left side plane is if we were looking for the left side
+                    # consider left, up, diagonal
+                    left = moveArray[k][i-1][j]
+                    up = moveArray[k-1][i][j]
+                    
+                    # we can consider diagonal
+                    if ghost3[k] == ghost2[i]:
+                        diagonal = moveArray[k-1][i-1][j]
+                        # if we want the left parent
+                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
+                            moveArray[k][i][j] = (left[0]+1, ghost2[i], (k,i-1,j))
+                        # if we want the above parent
+                        elif up[0] < diagonal[0]:
+                            moveArray[k][i][j] = (up[0]+1, ghost3[k], (k-1,i,j))
+                        else: #use diagonal
+                            moveArray[k][i][j] = (diagonal[0]+1, ghost3[k], (k-1,i-1,j))
+
+                    else: # do not consider diagonal
+                        if left[0] < up[0]: #use left parent
+                            moveArray[k][i][j] = (left[0]+1, ghost2[i], (k,i-1,j))
+                        else: # use above parent
+                            moveArray[k][i][j] = (up[0]+1, ghost3[k], (k-1,i,j))
+
+                else:
+                    
 
