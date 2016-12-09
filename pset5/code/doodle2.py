@@ -54,6 +54,7 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
     k = len(moveArray)-1
     i = len(moveArray[0])-1
     j = len(moveArray[0][0])-1
+    print(moveArray[k][i][j])
 
     while (i+j+k) > 0:
         if i==0 and j==0: # we can only move in k direction
@@ -69,7 +70,8 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
             j-=1
 
         elif i==0: # we can only move in j or k directions
-            if ghost1[j] == ghost3[k]: # move diagonally
+            if ghost1[j] == ghost3[k] and moveArray[k-1][i][j-1] <= moveArray[k-1][i][j] and moveArray[k-1][i][j-1] <= moveArray[k][i][j-1]: 
+                # move diagonally if it is best 
                 moveSeq.appendleft(ghost3[k])
                 j-=1
                 k-=1
@@ -82,7 +84,8 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
                     k-=1
 
         elif j==0: # we can only move in i or k directions
-            if ghost2[i] == ghost3[k]: # move diagonally
+            if ghost2[i] == ghost3[k] and moveArray[k-1][i-1][j] <= moveArray[k-1][i][j] and moveArray[k-1][i-1][j] <= moveArray[k][i-1][j]: 
+            # move diagonally
                 moveSeq.appendleft(ghost3[k])
                 i-=1
                 k-=1
@@ -95,7 +98,8 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
                     k-=1
 
         elif k==0: # we can only move in i or j directions
-            if ghost1[j] == ghost2[i]: # move diagonally
+            if ghost1[j] == ghost2[i] and moveArray[k][i-1][j-1] <= moveArray[k][i-1][j] and moveArray[k][i-1][j-1] <= moveArray[k][i][j-1]: 
+            # move diagonally
                 moveSeq.appendleft(ghost2[i])
                 j-=1
                 i-=1
@@ -264,7 +268,7 @@ def triple_kill(ghost1, ghost2, ghost3):
                     if ghost1[j] == ghost2[i]:
                         moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k][i][j-1], moveArray[k][i-1][j-1])
                     else:
-                        moveArray[k][i][j] = 1+ min(moveArray[k][i-1][j], moveArray[k][i][j-1])
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k][i][j-1])
 
                 elif j==0: # we are in the left plane
                     # consider: parent i, parent k, parent ik
@@ -309,8 +313,8 @@ def triple_kill(ghost1, ghost2, ghost3):
     return recoverPath3D(moveArray, ghost1, ghost2, ghost3)
 
 
-moves1 = ['C', 'B', 'A', 'B', 'A', 'D']
-moves2 = ['B', 'A', 'B', 'A', 'D', 'C', 'D']
-moves3 = ['D', 'C', 'D', 'A', 'A']
-student_res = triple_kill(moves1, moves2, moves3)
-print student_res
+# moves1 = ['C', 'B', 'A', 'B', 'A', 'D']
+# moves2 = ['B', 'A', 'B', 'A', 'D', 'C', 'D']
+# moves3 = ['D', 'C', 'D', 'A', 'A']
+# student_res = triple_kill(moves1, moves2, moves3)
+# print student_res
