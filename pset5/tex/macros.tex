@@ -3,7 +3,7 @@
 \newcommand{\name}{}
 
 \usepackage{latexsym}
-\usepackage{bbm}
+%\usepackage{bbm}
 \usepackage{times,url}
 \usepackage{clrscode}
 
@@ -103,7 +103,7 @@ Massachusetts Institute of Technology \hfill 6.006 Spring 2014\newline
   \else
   (#1 parts)
   \fi
-  \ 
+  \
 }
 
 \newcommand{\bparts}{\begin{problemparts}}
@@ -122,7 +122,7 @@ Massachusetts Institute of Technology \hfill 6.006 Spring 2014\newline
 \newcommand{\Spawn}{{\bf spawn} }
 \newcommand{\Sync}{{\bf sync}}
 
-\renewcommand{\cases}[1]{\left\{ \begin{array}{ll}#1\end{array}\right.}
+%\renewcommand{\cases}[1]{\left\{ \begin{array}{ll}#1\end{array}\right.}
 \newcommand{\cif}[1]{\mbox{if $#1$}}
 \newcommand{\cwhen}[1]{\mbox{when $#1$}}
 
@@ -185,7 +185,7 @@ Massachusetts Institute of Technology \hfill 6.006 Spring 2014\newline
 \def\fnum@table{{\bf Table \thetable}}
 \let\@mycaption\caption
 %\long\def\@mycaption#1[#2]#3{\addcontentsline{\csname
-%  ext@#1\endcsname}{#1}{\protect\numberline{\csname 
+%  ext@#1\endcsname}{#1}{\protect\numberline{\csname
 %  the#1\endcsname}{\ignorespaces #2}}\par
 %  \begingroup
 %    \@parboxrestore
@@ -289,6 +289,7 @@ bbllx=#2,bblly=#3,bburx=\bbx,bbury=\bby}}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{claim}[theorem]{Claim}
 \newtheorem{xample}{Example}
 \newtheorem{definition}{Definition}
 \newenvironment{example}{\begin{xample}\rm}{\end{xample}}
@@ -309,7 +310,7 @@ bbllx=#2,bblly=#3,bburx=\bbx,bbury=\bby}}
 \newcommand{\defn}[1]{{\boldmath\textit{\textbf{#1}}}}
 \newcommand{\defi}[1]{{\textit{\textbf{#1\/}}}}
 
-\newcommand{\red}{\leq_{\rm P}}
+%\newcommand{\red}{\leq_{\rm P}}
 \newcommand{\lang}[1]{%
 \ifmmode\mathord{\mathcode`-="702D\rm#1\mathcode`\-="2200}\else{\rm#1}\fi}
 
@@ -377,7 +378,7 @@ bbllx=#2,bblly=#3,bburx=\bbx,bbury=\bby}}
 \newcommand{\lirefthree}[3]{lines \ref{li:#1}, \ref{li:#2}, and~\ref{li:#3}}
 
 \newcommand{\lemlabel}[1]{\label{lem:#1}}
-\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}} 
+\newcommand{\lemref}[1]{Lemma~\ref{lem:#1}}
 
 \newcommand{\exref}[1]{Exercise~\ref{ex:#1}}
 

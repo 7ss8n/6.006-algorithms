@@ -1,7 +1,11 @@
 %
 % 6.006 problem set 1 solutions template
 %
+
+
 \documentclass[12pt,twoside]{article}
+
+\usepackage{tikz}\usetikzlibrary{trees}
 
 \usepackage{amsmath}
 \usepackage{color}
@@ -16,12 +20,18 @@
 
 \newcommand{\theproblemsetnum}{1}
 \newcommand{\releasedate}{Tuesday, September 13}
-\newcommand{\partaduedate}{Tuesday, September 27}
+\newcommand{\partaduedate}{Tuesday, September 28}
 \newcommand{\tabUnit}{3ex}
+\newcommand{\myname}{Milo H. Knowles}
+
+%define collaborators here
+\newcommand{\collabs}{Gillian Belton, Magnus Johnson, Wala'a Alkhanaizi}
+
 \newcommand{\tabT}{\hspace*{\tabUnit}}
 
 \title{6.006 Problem Set 1}
 
+%everything after the begin command is in the document
 \begin{document}
 
 \handout{Problem Set \theproblemsetnum}{September 13, 2016}
@@ -36,11 +46,11 @@
 
 \medskip
 
-{\bf Name:} Your Name
+{\bf Name:} \myname
 
 \medskip
 
-{\bf Collaborators:} Name1, Name2 
+{\bf Collaborators:} \collabs
 
 \medskip
 
@@ -52,7 +62,7 @@
 
 % Some useful commands:
 %$f(x) = \Theta(x)$
-%$T(x, y) \leq \log(x) + 2^y + \binom{2n}{n}$
+%$T(x, y) \leq \\log(x) + 2^y + \binom{2n}{n}$
 % {\tt code\_function}
 
 
@@ -98,29 +108,150 @@
 
 \begin{problems}
 
+%star after section means that the section is not NUMBERED
 \section*{Part A}
 
 \problem  % Problem 1
 
 \begin{problemparts}
-\problempart Part a  % Problem 1a
-\problempart Part b  % Problem 1b
-\problempart Part c  % Problem 1c
+\problempart In order of increasing growth: $$[(\log_2n^2)^2, n, n\log n,  n^2, 2^n ]$$
+First,
+$$(\log n^2)^2 = 4(\log n)^2$$ which grows more slowly than $n$ because generally the logarithm of a number is less than the number itself. This also explains why $n \log n$ is before $n^2$. An expression with a growing variable in the exponent will be bigger than an expression with a constant exponent, so $O(2^n)$ is the largest.
+
+\problempart In order of increasing growth: $$[f_1, f_6, f_3, f_5, f_2, f_4]$$
+First, some simplifications:
+$$f_1 = \log((\log n)^3) = 3log(\log n)$$
+$$f_5 = \log(3(n^{n^3})) = n^3\log(3n)$$
+$f_1$ has the smallest order of growth because it is a log of a log. $f_6$ is the next smallest because it has a constant exponent. $f_3$ is raised to the power $\log n$ which grows more slowly than the $n^3$ term of  $f_5$. $f_2$ has an exponent that grows with $n$, but $f_4$ is biggest because it has two layers of exponents, one of which is constant, and one of which grows with n.
+
+\problempart In order of increasing growth: $$[f_5, f_1, f_2, f_4, f_3]$$
+
+If we realize that $f_1 = 4^{3n} = 2^{6n}$, then the exponents can be easily compared. Ranking the exponents from smallest to largest will give the correct order for the functions in this group. $$ 5n < 6n < n^4 < 3^n < 3^{n+1} $$
 \end{problemparts}
+
+
 
 \problem  % Problem 2
 
 \begin{problemparts}
-\problempart Part a % Problem 2a
-\problempart Part b % Problem 2b
+
+\problempart Solving Recurrences
+\begin{enumerate}
+	\item $T(n) = 8T(\frac{n}{3})+ n^2 = O(n^2)$
+	\item $T(n) = 10T(\frac{n}{3})+ n^2 = O(n^{\log_3 10})$
+	\item $T(n) = 2T(\frac{n}{2})+ n$ \\
+	Using the Master Theorem, $T(n)=O(n \log n)$ \\
+	Using the recursion tree method: \\
+	
+	
+\begin{tikzpicture}[level distance=1.5cm,
+  level 1/.style={sibling distance=3cm},
+  level 2/.style={sibling distance=1.5cm}]
+  \node {$T(n)$}
+     child {node {$T(\frac{n}{2})$}
+     child {node {$...$}   
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}
+    }
+      child {node {$...$}
+      child {node {$T(1)$}}
+      child {node {$T(1)$}}}
+    }
+     child {node {$T(\frac{n}{2})$}
+     child {node {$...$}
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}}
+     child {node {$...$}
+     child {node {$T(1)$}}
+     child {node {$T(1)$}}
+     } 
+     };
+\end{tikzpicture} \\
+\bigskip
+
+The $2T(\frac{n}{2})$ term is the split time.\\
+The $n$ term represents the merge time. \\
+ 
+At the 0th level of the tree, $T(n)$ has to merge 2 leaves, each of size $\frac{n}{2}$. Therefore it takes $n$ time to combine on that level. At each level, the time to combine is still $n$, because there are twice as many leaves, but each leaf has half the size. There are $\log n$ levels of the tree, and each level has a combine time of $n$, so $T(n) = O(n \log n)$.
+
+	\vspace{5mm}
+	
+	\item $T(n) = T(\frac{n}{2})+ O(n)$ \\
+	Expanding the recurrence: \\
+	$T(n) = T(\frac{n}{2}) + O(n)$ \\	$T(n) = T(\frac{n}{2}) + cn $\\
+	$T(n) = T(\frac{n}{4}) + c\frac{n}{2} cn$ \\	$T(n) = T(\frac{n}{8}) + c\frac{n}{4} + c\frac{n}{2} + cn $\\
+	$...$ \\
+	$T(n) = T(1) + cn(1 + \frac{1}{2} + \frac{1}{4} + \frac{1}{8} + ... + \frac{1}{2^i})$ \\	This sum has a finite value, so $T(n) = O(n)$.
+
+\end{enumerate}
+
+
+\problempart Setting up recurrences:
+\begin{enumerate}
+	
+	\item To naively calculate the $n^{th}$ factorial number: \\
+	$T(n\leq1) = O(1)$ \\
+	$T(n) = T(n-1) + O(1)$ \\
+	
+Solution:
+\begin{center}
+$ T(n) = T(n-1) + O(1)$\\
+$ T(n) = T(n-2) + O(1) + O(1)$\\
+$ T(n) = T(n-3) + O(1) + O(1) + O(1)$\\
+$ T(n) = n \cdot O(1)$ \\
+$ T(n) = O(n)$ \\
+ \end{center}
+
+	\item To naively calculate the $n^{th}$ Fibonacci number: \\
+	$T(n\leq1) = O(1)$ \\
+	$T(n) = T(n-1) + T(n-2) + O(1)$\\
+
+\end{enumerate}
 \end{problemparts}
+
+
+
 
 \problem  % Problem 3
 
 \begin{problemparts}
-\problempart Part a % Problem 3a
-\problempart Part b % Problem 3b
+\problempart Peak squares in unbalanced arrays.
+
+\begin {enumerate}
+	\item If we know the color of $A[0][k]$ and $A[n-1][k]$ and the colors of the four corners of $A$, then we can find a smaller sized unbalanced sub-array of $A$. To do this, we must consider two cases.
+	\begin {itemize}
+		\item If the colors at $A[0][k]$ and $A[n-1][k]$ are {\bf the same}, then we choose the corners from the side of $A$ with different colors (this could be either the left corners or right corners). Now we have a sub-array with exactly one corner that is a different color.
+		
+		\item If the colors at $A[0][k]$ and $A[n-1][k]$ are {\bf different}, then we choose the corners from the side of $A$ with the matching colors. Now we have a sub-array with exactly one corner that is a different color.
+	
+	\end {itemize}
+
+	\item If we choose $k=\frac{n}{2}$, then we can divide the array $A$ into an unbalanced sub-array with width $\frac{n}{2}$ and height $n$. We can then divide in half vertically, producing a square, unbalanced sub-array with width $\frac{n}{2}$ and height  $\frac{n}{2}$. If we repeat this process recursively, we will eventually have a 2x2 unbalanced subarray, which is necessarily a peak square.
+	
+	
+	\item $T(n)= T(\frac{n}{2}) + O(1) $ \\
+	At each step, the algorithm reduces the size of the array to $\frac{1}{2}$ it's previous size. Each recursive step takes $O(1)$ time, and there will be $\log_2n$ recursive steps required to reach a 2x2 array. Therefore, the algorithm takes $O(\log n)$ time.
+
+
+\end {enumerate}
+
+\problempart
+
+\begin{enumerate}
+
+	\item First, note that $A[0]$ and $A[n-1]$ are an adjacent pair of array entries and $A[k]$ and $A[k+1]$ are another adjacent pair of array entries. If we find the maximum entry $x$ of these 4 entries, we also know that there is an adjacent entry (either before or after in the array) that is necessarily smaller than $x$. Now consider the 2 remaining entries (we eliminate $x$ and the adjacent entry from our original four). For example, if our $x=A[k]$, then the adjacent entry is $A[k+1]$, so we are left with $A[0]$ and $A[-1]$. Let $y$ be the entry from these two remaining entries that is closest to $x$. Then, on the circular sub-array A[x:y] inclusive, we are guaranteed to find a peak.
+
+	\item If we choose $k$ such that $k=\frac{n}{2}$, we can divide our search space in half during the divide step. We are guaranteed to find a peak on the new search space, which has $\frac{n}{2}$. The divide step takes $O(1)$ time, because we are just finding the maximum of four array entries during this step. Once we have a subarray with size $n\leq4$, we will find the maximum entry directly. There will be order $\log_2 n$ divide steps to reduce the array to this size. Therefore, this algorithm will find a peak in $O(\log n)$ time.
+	
+\end{enumerate}
+
 \end{problemparts}
+
+
+
+
+
+
 
 \section*{Part B}
 
@@ -129,8 +260,91 @@
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
-\problempart Part d % Problem 4d
+
+
+\problempart Below is a list of the constants used in runtime analysis for parts (b) and (c):
+\begin{itemize}
+	\item $n$, the total number of articles
+	\item $m$, the total number of words in each article (assumed to be the same for every article)
+	\item $k$, the number of relevant articles to return
+	\item $q$, the number of distinct terms in the query (for part (c))
+	\item $w$, the number of unique words in the corpus (no repeats)
+	\item $l$, the total number of words (with repeats) in the query (for part (c))
+\end{itemize}
+
+%make a list of the steps in part(b) with their runtime expressions
+
+%%% STORE NEEDED VARIABLES HERE %%%
+\newcommand{\functionb}{get-relevant-articles-tf-idf}
+\newcommand{\functionc}{search}
+
+% use \vspace to add vertical space!
+\vspace{5mm}
+
+% text for analysis of part (b)
+The implementation of {\bf \functionb} from {\bf part(b)} is outlined below:
+\begin{enumerate}
+	\item For each article, build a term-frequency dictionary. This takes $\theta(nm)$ time, because the code iterates over exactly $n$ articles, and $m$ words in each article.
+	\item Next, the function builds a document-frequency dictionary, storing each word in the corpus as a key, and the number of articles that contain that word as a value. This takes $\theta(nm)$ time, because the code iterates over $n$ articles, and $m$ words in each article.
+	\item For each {\textit unique} term in the corpus, the inverse-document-frequency is computed and added to a new {\bf corpusIDFDict} dictionary. This takes $\theta(w)$ time, because the code only considers unique words, without repeats.
+	\item For each article in the corpus an angle is computed between that article and the query article. $\theta(n-1)$ comparisons must be done, because the query article is not compared to itself. The helper function {\bf computeAngleBetweenWFIDFDicts} is used to compute the angle between two WFIDF dictionaries. It runs in $\theta(5m)$ time.
+		\begin{itemize}
+			\item The helper function {\bf computeAngleBetweenWFIDFDicts} is used to compute the angle between two WFIDF dictionaries. It runs in $\theta(5m)$ time.
+			\item $\theta(m)$ to convert one term-frequency dictionary to a TFIDF dictionary.
+			\item $\theta(m)$ to convert the other term-frequency dictionary to a TFIDF dictionary.
+			\item $\theta(m)$ to compute the dot product of the two TFIDF dictionary values.
+			\item $\theta(m)$ to compute the magnitude of one TFIDF dictionary.
+			\item $\theta(m)$ to compute the magnitude of the other TFIDF dictionary.
+		\end{itemize}
+	\item The angle between every article and the query article is stored in a list. There are $n-1$ elements in the list, so it will take $O(n \cdot \log_2n)$ time to sort this list.
+	\item To return the $k$ closest articles from the sorted list, it will take $\theta(k)$ time.
+\end{enumerate}
+
+\vspace{5mm}
+
+%text for analysis of part (c)
+The implementation of {\bf \functionc} from {\bf part(c)} is outlined below:
+\begin{enumerate}
+	\item For each article build a term-frequency dictionary. This takes $\theta(nm)$ time, because the code iterates over exactly $n$ articles, and $m$ words in each article.
+	\item Next, the function builds a document-frequency dictionary, storing each word in the corpus as a key, and the number of articles that contain that word as a value. This takes $\theta(nm)$ time, because the code iterates over $n$ articles, and $m$ words in each article.
+	\item For each {\textit unique} term in the corpus, the inverse-document-frequency is computed and added to a new {\bf corpusIDFDict} dictionary. This takes $\theta(w)$ time, because the code only considers unique words, without repeats.
+	\item Parse the user's query and remove repeated words. This takes $\theta(l)$ time.
+	\item For each article, add up the TFIDF scores for each distinct word in the query to get a total score. This takes $\theta(nq)$ time, because there are $n$ articles and $q$ words in the query that must be retrieved from an article's TFIDF dictionary.
+	\item It takes $O(n \cdot \log_2n)$ time to sort the list of $n$ articles by their TFIDF score.
+	\item It takes $\theta(k)$ time to take the $k$ best non-negative articles from the sorted list of articles.
+\end{enumerate}
+
+\vspace{5mm}
+
 \problempart Part e % Problem 4e
+\begin{enumerate}
+	\item Although the {\bf get-relevant-articles-tf-idf} method is clearly superior to the {\bf get-relevant-articles-doc-dist} at returning relevant articles, both methods show cases where they return more intuitive results.
+	\begin{itemize}
+		\item The document-distance method for finding relevant articles is advantageous when the corpus of articles is relatively homogenous in terms of topic. If all articles focus on a similar topic, say astronomy, then words like "planet" and "telescope" might occur in every article, and therefore be ignored by the TF-IDF method?this is bad for finding relevant documents. However, the document distance would not ignore these words, and do a better job of providing similar articles.
+		
+		\item In general, TF-IDF is useful for searching through a diverse set of documents to find results that are tailored to the 			query article. This is because TF-IDF gives common words a low weight, and ignores words that appear in every article (and, 		the, with, because). It gives high weight to the words in each article that are unique. 
+
+		\end{itemize}
+
+	\item Generally, longer documents will have higher word frequencies for words that are related to the topic of that article. These document-specific words are also likely to have a high TF-IDF weight, because they are unique to that article. Therefore, they will make a large contribution computed "relevance" of the document. So long documents will tend to dominate search results. We could modify the TF-IDF calculation so that word-frequencies are normalized based on the total number of distinct words $N$ in an article. For each word $w$ in an article which occurs with frequency $F_w$, the TF-IDF calculation would look like:
+	$$ TFIDF_w = (F_w \cdot IDF_w) / N $$
+	
+	
+	\item The top 3 searches for "Apple" using TF-IDF are: \\
+	'Apple Inc', 1.2453550760561019 \\
+	'Macintosh', 1.4112032100984244 \\
+	'Pear', 1.4620266501066561 \\ \\
+	And the top 3 searches for "Apple" using document-distance are: \\
+	'Apple Inc', 0.4488082903602776 \\
+	'Banana', 0.4518146534769454 \\
+	'Tomato', 0.4557968967347264 \\
+	
+	Here, document-distance performs better, because it returns two fruits, whereas TF-IDF returns only one fruit. To improve TF-IDF, we could remove all instances of the title word, "Apple," from the article. This would remove the ambiguity surrounding the word "apple," and leave behind words that describe the characteristics of an apple (the fruit). Therefore, a search would find documents that have similar descriptors (other fruit articles), and not just articles the same title.
+	
+\end{enumerate}
+
+
+
 \end{problemparts}
 
 \end{problems}

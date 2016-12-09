@@ -1,16 +1,6 @@
-# -*- coding: utf-8 -*-
-
-
 import os
 import math
 import re
-
-"""
-Construct a program that, given an article title, returns the k articles with the least distance
-from that article. Specifically, implement the get relevant articles doc dist
-function in search engine.py.
-"""
-
 
 def computeAngleBetweenWordFreqDicts(d1, d2):
 	"""
@@ -32,8 +22,6 @@ def computeAngleBetweenWordFreqDicts(d1, d2):
 	#now compute the angle
 	angle = math.acos(float(dotProd) / float(d1_magnitude*d2_magnitude))
 	return angle
-
-
 
 def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	"""
@@ -67,8 +55,6 @@ def computeAngleBetweenWFIDFDicts(d1,d2,corpusIDFDict):
 	angle = math.acos(float(dotProd) / (d1_magnitude*d2_magnitude))
 	return angle
 
-
-
 def buildWordFreqDict(list_of_words):
 	"""
 	list_of_words: a list of the words in an article
@@ -87,8 +73,6 @@ def buildWordFreqDict(list_of_words):
 			wordFreqDict[word.lower()]=1
 	return wordFreqDict
 
-
-
 def extract_corpus(corpus_dir = "articles"):
 	"""
 	Returns a corpus of articles from the given directory.
@@ -104,50 +88,50 @@ def extract_corpus(corpus_dir = "articles"):
 	num_documents = 0
 	for filename in os.listdir(corpus_dir):
 		with open(os.path.join(corpus_dir, filename)) as f:
-			corpus[filename] = re.sub("[^\w]", " ", f.read()).split()
+			corpus[filename] = re.sub("[^\w]", " ",  f.read()).split()
 	return corpus
+
 
 #title dist pair object that makes it easier to sort a list of title/distance pairs
 class titleDistPair(object):
 	def __init__(self, title, angle):
 		self.title = title
 		self.angle = angle
-	def __cmp__(self,other):
+
+	def __lt__(self,other):
 		if self.angle < other.angle:
-			return -1
-		elif self.angle > other.angle:
-			return 1
-		else:
-			if self.title<other.title:
-				return -1
-			elif self.title>other.title:
-				return 1
-			else:
-				return 0
+			return True
+		elif self.angle == other.angle:
+			if self.title < other.title:
+				return True
+
+	def __eq__(self,other):
+		if self.angle == other.angle and self.title == other.title:
+			return True
+
 
 class titleRelevancePair(object):
 	def __init__(self, title, TFIDF_score):
 		self.title = title
 		self.tfidf_score = TFIDF_score
-	def __cmp__(self,other):
-		if type(other) == int:
-			#print "Handled int"
-			return 1
-		#print "Comparing:", self, other
-		if self.tfidf_score > other.tfidf_score:
-			return 1
-		elif self.tfidf_score < other.tfidf_score:
-			return -1
+
+	def __gt__(self,other):
+		if type(other)==int:
+			return True
+
+	def __lt__(self,other):
+		if self.tfidf_score < other.tfidf_score:
+			return True
 		elif self.tfidf_score == other.tfidf_score:
-			if self.title<other.title:
-				return -1
-			elif self.title>other.title:
-				return 1
-			else:
-				return 0
+			if self.title < other.title:
+				return True
+
+	def __eq__(self,other):
+		if self.tfidf_score == other.tfidf_score and self.title == other.title:
+			return True
+
 	def __repr__(self):
 		return "(%s,%f)" % (self.title,self.tfidf_score)
-
 
 class SearchEngine(object):
 	"""
@@ -211,7 +195,6 @@ class SearchEngine(object):
 		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
 		return kClosest
 
-
 	def get_relevant_articles_tf_idf(self, title, k):
 		"""
 		Returns the articles most relevant to a given document, limited to at most
@@ -255,20 +238,13 @@ class SearchEngine(object):
 		for word in docFreqDict.keys():
 			corpusIDFDict[word] = math.log((float(numArticles) / float(docFreqDict[word])))
 
-		#print(corpusIDFDict)
 		#now compute the angle between every article and the query article, and store it as a title/document-distance object
 		titleDistPairs = []
-		#print wordFreqDictDict[title]
 
-		counter = 0
 		for other_title in self.corpus.keys():
-
-			#don't compare the query article to itself
-			if other_title == title:
+			if other_title == title: #don't compare the query article to itself
 				continue
-
 			else:
-				#print wordFreqDictDict[title]
 				angle = computeAngleBetweenWFIDFDicts(wordFreqDictDict[title],wordFreqDictDict[other_title],corpusIDFDict)
 				titleDistPairs.append(titleDistPair(other_title,angle))
 
@@ -280,7 +256,6 @@ class SearchEngine(object):
 		#take the k-nearest, and convert from a title/dist object to a tuple
 		kClosest = [(i.title, i.angle) for i in titleDistPairs[0:k]]
 		return kClosest
-
 
 	def search(self, query, k):
 		"""
@@ -375,19 +350,16 @@ class SearchEngine(object):
 		#convert back to a tuple
 		kClosest = [(i.title, i.tfidf_score) for i in kbest_nonnegative]
 		return kClosest
-
 		
 if __name__ == '__main__':
-
 	corpus = extract_corpus()
 	e = SearchEngine(corpus)
 
-	kclosest = e.get_relevant_articles_tf_idf('Berry',5)
-	print(kclosest)
-	
-	#results = e.search('should i use a graph algorithm or tree algorithm',5)
-	#print results
-	
+	result_dd = e.get_relevant_articles_doc_dist("Apple",3)
+	result_tfidf = e.get_relevant_articles_tf_idf("Apple",3)
+	print "DOCDIST:", result_dd
+	print "TFIDF:", result_tfidf
+
 	"""
 	print("Welcome to 6006LE! We hope you have a wonderful experience. To exit, type 'exit.'")
 	print("\nSuggested searches: the yummiest fruit in the world, child prodigy, operating system, red tree, coolest algorithm....")
@@ -403,7 +375,6 @@ if __name__ == '__main__':
 			print("Top results: ")
 			for title, score in e.search(query, 5):
 				print ("    - %s (score %f)" % (title, score))
+
 	"""
-
-
 	

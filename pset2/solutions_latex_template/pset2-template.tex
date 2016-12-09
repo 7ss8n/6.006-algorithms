@@ -109,7 +109,7 @@
 \problem  % Problem 1
 
 \begin{problemparts}
-\problempart $T(n) = \theta(n^2*\log n$ is a solution to $T(n) = aT(\frac{n}{2}) + \theta(n^2)$. \\
+\problempart $T(n) = \theta(n^2*\log n)$ is a solution to $T(n) = aT(\frac{n}{2}) + \theta(n^2)$. \\
 Consider $n^{\log_2 a}$ vs. $n^2$ \\
 Compare the exponents: $\log_2 a$ and $2$ must be equal. \\
 $\implies a=4$
@@ -160,8 +160,7 @@ $\implies$ $f(n)=n^2$ is one possible $f(n)$.
 \problempart Sorting a Rectangle
 
 
-%TODO: replace all nodes with arrays!
-
+% really annoying merge sort tree visualization
 \begin{tikzpicture}[level distance=4cm,
   level 1/.style={sibling distance=3cm},
   level 2/.style={sibling distance=1.5cm}]
@@ -214,7 +213,6 @@ $\implies$ $f(n)=n^2$ is one possible $f(n)$.
 
 
 \bigskip
-\bigskip
 
 This algorithm is essentially a modified version of merge sort. The array $A$ can be split up into individual columns, each of which is a leaf in the binary tree above. \\
 
@@ -224,19 +222,49 @@ At each layer of the tree, there are $\frac{m}{2^l}$ arrays to merge, where $l$ 
 
 The height of the tree is $\log_2 m$, and each layer takes $\theta(mn)$ time, so the runtime will be $\theta(mn \cdot \log_2 m)$.
 
-
-
 \end{problemparts}
+
 
 
 \problem  % Problem 3
 
 \begin{problemparts}
-\problempart Part a % Problem 3a
-\problempart Part b % Problem 3b
-\problempart Part c % Problem 3c
-\problempart Part d % Problem 3d
+\problempart Algorithm to swap two arbitrary trucks and return all the trucks that were moved in the process to their original positions:
+
+\begin{enumerate}
+\item Given an arbitrary pair of trucks $A$ and $B$, their distance from each other is, at most,$n-1$ spaces. Let Truck $A$ have lower index and Truck $B$ have higher index. While the distance between the two trucks (in spaces) is $\geq k$, swap Truck $A$ with the truck $k$ spaces ahead. This will take, at most, $\frac{n}{k}-1$ swaps.
+\item Once the Truck $A$ is within $k$ spaces of the Truck $B$, swap them with each other. Now, Truck $A$ is in the correct position and there have been, at most, $\frac{n}{k}$ swaps.
+\item Excluding the final swap, make every swap again in reverse chronological order. This will leave Truck $A$ in place, put Truck $B$ in the original space of Truck $A$, and return every other truck to its original space. This will require, at most, $\frac{n}{k}-1$ swaps, because we exclude the final swap.
+
+\end{enumerate}
+\smallskip
+
+At this point, there have been at most, $\frac{2n}{k}-1$ swaps. This means that the algorithm has taken $O(\frac{n}{k})$ time.
+\bigskip
+
+\problempart Algorithm to compare two arbitrary trucks, and return all trucks that were moved in the process to their original positions:
+
+\begin{enumerate}
+\item Given an arbitrary pair of trucks $A$ and $B$, their distance from each other is, at most,$n-1$ spaces. Let Truck $A$ have lower index and Truck $B$ have higher index. While the distance between the two trucks (in spaces) is $> k$, swap Truck $A$ with the truck $k$ spaces ahead. This will take, at most, $\frac{n}{k}-1$ swaps.
+\item Once the Truck $A$ is within $k$ spaces of the Truck $B$, the two trucks can be compared. 
+\item Make every swap again in reverse chronological order. This will return every truck to its original space. This will require, at most, $\frac{n}{k}-1$ swaps, because this is the maximum number of swaps we made in step 1.
+
+\end{enumerate}
+\smallskip
+
+At this point, there have been at most, $\frac{2n}{k}-2$ swaps. This means that the algorithm has taken $O(\frac{n}{k})$ time.
+\bigskip
+
+\problempart To sort the trucks in $O(\frac{n^2\log n}{k})$ time, we can use a modified version of heapsort. Building the heap takes $O(\frac{n^2}{k}$ time, because heapify will do, at most, $n$ comparison-based swaps, each of which take $O(\frac{n}{k}$ time. Although comparisons and swaps each take $O(\frac{n}{k})$ time, they can be easily combined into a single $O(\frac{n}{k})$ process that compares two trucks and then swaps them before restoring other trucks to their correct positions. \\
+
+Heapsort runs the extract\_min subroutine $n$ times on the heap, taking the minimum element in constant time and running min\_heapify after every extraction. The subroutine min\_heapify runs in $O(\frac{n\log n}{k})$, because at most $\log n$ violations of the MHP must be fixed in the heap, and each fix requires an $O(\frac{n}{k})$ comparison-swap, as we saw previously. Therefore, the runtime of heapsort is $O(\frac{n^2\log n}{k}). 
+
+
+\problempart Extra credit.
 \end{problemparts}
+
+
+
 
 \section*{Part B}
 
@@ -260,12 +288,16 @@ for \= s in competitors: \\
 					\>\>\>\>\>min\_losetime = time\\
 	\>losetimes[s] = min\_losetime\\
 	\\
-	\# increment bowser's rank every time a competitor is found with a longer finish time (meaning they outlasted bowser)
-	bowser\_rank = 1\\
-	for \=time in losetimes.values():\\
-		\>if \=time $>$ losetimes['bowser']:\\
-			\>\>bowser\_rank += 1\\
+	\smallskip
+
 \end{tabbing}
+
+With the list of minimum losetimes for each player, we can build a list of race events by extracting the event with the smallest losetime, and removing all of the possible events where the player who was just taken out of the race overtakes another racer. We must extract the smallest losetime at most $n$ times, and each extraction costs $O(n)$ time. Therefore, this step takes $O(n^2)$ time. \\
+
+Finally, we iterate over the list of events (of which there are $n$, to find the position in the events list that Bowser is in. His rank will be his index in the list plus one, due to zero indexing. \\
+
+The total cost of this algorithm is $O(n^2)$, because building the losetimes dictionary takes $O(n^2)$ time, and getting a sorted race events list takes $O(n^2)$ time. \\
+
 \smallskip
 This algorithm will take $O(n^2)$ time because it takes $O(n)$ time to compute the minimum lose-time for each competitor, and there are $n$ competitors. 
 
@@ -274,12 +306,12 @@ This algorithm will take $O(n^2)$ time because it takes $O(n)$ time to compute t
 \problempart \emph{Submit your implementation on alg.csail.mit.edu}
 
 
-\problempart We assume that Charlie does pass Bowser. In this case, we must consider 3 additional events:
+\problempart We assume that Charlie does pass Bowser. In this case, we must add 1 event and remove 1 event:
 \begin{itemize}
-\item Bowser passes Alice before Charlie passes Bowser. This is only possible if $v_b > v_a$. As a result, Alice is removed from the race and Bowser is removed from the race.
-\item Deborah passes Charlie after Charlie passes Bowser. This is only possible if $v_d > v_c$. This results in Bowser being removed and then Charlie being removed from the race.
-\item Alice passes Deborah. This will happen if $v_a > v_d$. This means that Bowser and then Deborah will be removed from the race.
-\item We can remove the possibility of Bowser passing Alice or Deborah from consideration, because Charlie passes Bowser and removes him from the race first.
+
+\item Because Bowser is eliminated from the race, the event of Bowser passing Alice is no longer possible and must be removed. If we are considering all possible passing events, not just players passing the player directly in front of them, then we must remove all events in which Bowser passes a competitor. 
+
+\item Once Bowser is gone from the race, Alice will be now be the player in front of Charlie. If $v_c > v_a$, then we must add the event of Charlie passing Alice. If we are considering all possible passing events, not just players passing the player directly in front of them, then we must remove all events in which Bowser is passed by a competitor. 
 
 \end{itemize}
 

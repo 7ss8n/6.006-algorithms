@@ -96,3 +96,5 @@ def exact_search(rolling_hash_obj, pattern, document):
 
     #if nothing was found, there is no match, so return None
     return None
+
+
