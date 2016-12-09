@@ -1,13 +1,11 @@
 ###################################
 ##########  PROBLEM 5-4 ###########
 ###################################
-
-#from collections import deque
+# import time
 
 def pp(matrix):
     for i in range(len(matrix)):
         print(matrix[i])
-
 
 def recoverPath2D(moveArray, ghost1, ghost2):
     """
@@ -48,12 +46,12 @@ def recoverPath2D(moveArray, ghost1, ghost2):
 
 
 def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
+    # t1 = time.time()
     moveSeq = []
 
     k = len(moveArray)-1
     i = len(moveArray[0])-1
     j = len(moveArray[0][0])-1
-    print(moveArray[k][i][j])
 
     while (i+j+k) > 0:
         if i==0 and j==0: # we can only move in k direction
@@ -139,16 +137,18 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
                 moveSeq.append(ghost2[i])
                 i,k = i-1,k-1
             else: # use whichever of i, j, k is shortest
-                if parent_i < parent_j and parent_i < parent_k: # use parent_i
+                if parent_i == min(parent_j, parent_i, parent_k): # use parent_i
                     moveSeq.append(ghost2[i])
                     i-=1
-                elif parent_j < parent_i and parent_j < parent_k: # use parent_j
+                elif parent_j == min(parent_i, parent_j, parent_k): # use parent_j
                     moveSeq.append(ghost1[j])
                     j-=1
                 else:
                     moveSeq.append(ghost3[k])
                     k-=1
     moveSeq.reverse()
+    # t2 = time.time()
+    # print("Recover time:", t2-t1)
     return moveSeq
 
 def double_kill(ghost1, ghost2):
@@ -214,15 +214,12 @@ def double_kill(ghost1, ghost2):
                         moveArray[i][j] = up+1
     return recoverPath2D(moveArray, ghost1, ghost2)
 
-
-# res = double_kill(['A','B','B','B'], ['C','B','B','B','B'])
-# print(res)
-
 # #
 # PART B: Fill in the code for part b
 #
 
 def triple_kill(ghost1, ghost2, ghost3):
+    #t1 = time.time()
     """
     Compute the shortest move sequence which will make all three ghosts disappear.
 
@@ -245,9 +242,7 @@ def triple_kill(ghost1, ghost2, ghost3):
     ghost3 = ['_']+ghost3
 
     # [ghost3][ghost2][ghost1] order of indexing
-
     moveArray = [[[0 for i in range(len(ghost1))] for j in range(len(ghost2))] for k in range(len(ghost3))]
-    #moveArray[0][0][0] = (0, '_', (-1,-1,-1)) #add in the blank starting spot
     
     for k in range(len(ghost3)): # consider one ij plane at a time
         for i in range(len(ghost2)): # for a given row
@@ -318,4 +313,20 @@ def triple_kill(ghost1, ghost2, ghost3):
                     else: # just consider i, j, k
                         moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k)      
 
-    return recoverPath3D(moveArray, ghost1, ghost2, ghost3)
+    # t2 = time.time()
+    # print("Build time:", t2-t1)
+    path = recoverPath3D(moveArray, ghost1, ghost2, ghost3)
+    return path
+
+# moves1 = ['A', 'B', 'B', 'B', 'D', 'A', 'D', 'C', 'A', 'B', 'C', 'A', 'D', 'B', 'A', 'A', 'A', 'B']
+# moves2 = ['C', 'B', 'B', 'B', 'B', 'C', 'B', 'B', 'B', 'B', 'C', 'B', 'B', 'B', 'B', 'A', 'A']
+# moves2 = ['C', 'B', 'B', 'B', 'B', 'C', 'B', 'B', 'B', 'B', 'C', 'B', 'B', 'B', 'B', 'A', 'A']
+
+# double_kill_sol = double_kill(moves1,moves2)
+# triple_kill_sol = triple_kill(moves1,moves2,[])
+# print double_kill_sol
+# print triple_kill_sol
+
+
+
+
