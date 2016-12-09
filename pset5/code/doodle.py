@@ -11,20 +11,139 @@ def pp(matrix):
         print(matrix[i])
 
 
-def recoverPath2D(moveArray2D):
+def recoverPath2D(moveArray, ghost1, ghost2):
     """
     Starting from last move, follow parent pointers back until we get a parent points to (0,0), which is the start point
     """
-    currentIndex = (len(moveArray2D)-1, len(moveArray2D[0])-1)
-    print("Start:", currentIndex)
     moveSeq = deque()
 
-    while currentIndex != (0, 0):
-        moveSeq.appendleft(moveArray2D[currentIndex[0]][currentIndex[1]][1])
-        currentIndex = moveArray2D[currentIndex[0]][currentIndex[1]][2]
-    return list(moveSeq)
+    i = len(moveArray)-1
+    j = len(moveArray[0])-1
+
+    while (i + j) > 0:
+        if i==0: # we can only move left
+            moveSeq.appendleft(ghost1[j])
+            j-=1
+
+        elif j==0: # we can only move up
+            moveSeq.appendleft(ghost2[i])
+            i-=1
+
+        else: # consider left, up, diagonal
+            leftParent = moveArray[i][j-1]
+            aboveParent = moveArray[i-1][j]
+            diagonalParent = moveArray[i-1][j-1]
+
+            if ghost1[j] == ghost2[i]: # go diagonal
+                moveSeq.appendleft(ghost2[i])
+                i -= 1
+                j -= 1
+            elif leftParent < aboveParent: # go left
+                moveSeq.appendleft(ghost1[j])
+                j-=1
+            else: # go up
+                moveSeq.appendleft(ghost2[i])
+                i-=1
+    
+    return moveSeq
 
 
+def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
+    moveSeq = deque()
+
+    k = len(moveArray)-1
+    i = len(moveArray[0])-1
+    j = len(moveArray[0][0])-1
+    print(moveArray[k][i][j])
+
+    while (i+j+k) > 0:
+        if i==0 and j==0: # we can only move in k direction
+            moveSeq.appendleft(ghost3[k])
+            k-=1
+
+        elif j==0 and k==0: # we can only move in i direction
+            moveSeq.appendleft(ghost2[i])
+            i-=1
+
+        elif i==0 and k==0: # we can only move in j direction
+            moveSeq.appendleft(ghost1[j])
+            j-=1
+
+        elif i==0: # we can only move in j or k directions
+            if ghost1[j] == ghost3[k] and moveArray[k-1][i][j-1] <= moveArray[k-1][i][j] and moveArray[k-1][i][j-1] <= moveArray[k][i][j-1]: 
+                # move diagonally if it is best 
+                moveSeq.appendleft(ghost3[k])
+                j-=1
+                k-=1
+            else: # move in j or k direction
+                if moveArray[k][i][j-1] < moveArray[k-1][i][j]: # move in j
+                    moveSeq.appendleft(ghost1[j])
+                    j-=1
+                else:
+                    moveSeq.appendleft(ghost3[k]) # move in k
+                    k-=1
+
+        elif j==0: # we can only move in i or k directions
+            if ghost2[i] == ghost3[k] and moveArray[k-1][i-1][j] <= moveArray[k-1][i][j] and moveArray[k-1][i-1][j] <= moveArray[k][i-1][j]: 
+            # move diagonally
+                moveSeq.appendleft(ghost3[k])
+                i-=1
+                k-=1
+            else: # move in i or k direction
+                if moveArray[k][i-1][j] < moveArray[k-1][i][j]: # move in i
+                    moveSeq.appendleft(ghost2[i])
+                    i-=1
+                else:
+                    moveSeq.appendleft(ghost3[k])
+                    k-=1
+
+        elif k==0: # we can only move in i or j directions
+            if ghost1[j] == ghost2[i] and moveArray[k][i-1][j-1] <= moveArray[k][i-1][j] and moveArray[k][i-1][j-1] <= moveArray[k][i][j-1]: 
+            # move diagonally
+                moveSeq.appendleft(ghost2[i])
+                j-=1
+                i-=1
+            else: # move in i or j direction
+                if moveArray[k][i-1][j] < moveArray[k][i][j-1]: # move in i
+                    moveSeq.appendleft(ghost2[i])
+                    i-=1
+                else:
+                    moveSeq.appendleft(ghost1[j])
+                    j-=1
+
+        else: # we can go in any of 7 directions
+            parent_j = moveArray[k][i][j-1]
+            parent_i = moveArray[k][i-1][j]
+            parent_k = moveArray[k-1][i][j]
+
+            if ghost1[j] == ghost2[i] and ghost1[j] == ghost3[k]: # use ijk
+                moveSeq.appendleft(ghost2[i])
+                i-=1
+                j-=1
+                k-=1
+            elif ghost1[j] == ghost2[i]: # use ij
+                moveSeq.appendleft(ghost2[i])
+                i-=1
+                j-=1
+            elif ghost1[j] == ghost3[k]: # use jk
+                moveSeq.appendleft(ghost1[j])
+                j-=1
+                k-=1
+            elif ghost2[i] == ghost3[k]: # use ik
+                moveSeq.appendleft(ghost2[i])
+                i-=1
+                k-=1
+            else: # use whichever of i, j, k is shortest
+                if parent_i < parent_j and parent_i < parent_k: # use parent_i
+                    moveSeq.appendleft(ghost2[i])
+                    i-=1
+                elif parent_j < parent_i and parent_j < parent_k: # use parent_j
+                    moveSeq.appendleft(ghost1[j])
+                    j-=1
+                else:
+                    moveSeq.appendleft(ghost3[k])
+                    k-=1
+    return moveSeq
 
 def double_kill(ghost1, ghost2):
     """
@@ -42,16 +161,10 @@ def double_kill(ghost1, ghost2):
     seq : []
         move sequence of minimal length which will make both ghosts disappear
     """
-
+    ghost1 = ['_'] + ghost1
+    ghost2 = ['_'] + ghost2
     #initialize empty move array with |ghost1|+1 columns and |ghost2|+1 rows
-    # note: (0,0) is a _ empty starting space
-    
-
-    ghost1 = ['_']+ghost1
-    ghost2 = ['_']+ghost2
-
     moveArray = [[0 for i in range(len(ghost1))] for j in range(len(ghost2))]
-    moveArray[0][0] = (0, '_', (-1,-1))
 
     # fill in the moveArray row by row
     for i in range(len(ghost2)): # for a given row
@@ -63,13 +176,12 @@ def double_kill(ghost1, ghost2):
             #case 1: i=0 means that there are no slots above
             elif i==0:
                 # (Num. moves of left slot +1, letter of this col., index of left slot)
-                moveArray[i][j] = (moveArray[i][j-1][0]+1, ghost1[j], (i,j-1))
+                moveArray[i][j] = moveArray[i][j-1]+1
 
             #case 2: j=0 means that there are no slots to the left
             elif j==0:
                 # (Num. moves of above slot +1, letter of this row, indes of above slot)
-                moveArray[i][j] = (moveArray[i-1][j][0]+1, ghost2[i], (i-1, j))
-
+                moveArray[i][j] = moveArray[i-1][j]+1
 
             else: # consider item to left, item above, and diagonal item (if letter are the same)
                 # consider left, up, diagonal
@@ -79,23 +191,22 @@ def double_kill(ghost1, ghost2):
                 if ghost1[j] == ghost2[i]:
                     diagonal = moveArray[i-1][j-1]
                     # if we want the left parent
-                    if (left[0] < up[0]) and (left[0] < diagonal[0]):
-                        moveArray[i][j] = (left[0]+1, ghost1[j], (i,j-1))
+                    if (left < up) and (left < diagonal):
+                        moveArray[i][j] = left+1
 
                     # if we want the above parent
-                    elif up[0] < diagonal[0]:
-                        moveArray[i][j] = (up[0]+1, ghost2[i], (i-1,j))
+                    elif up < diagonal:
+                        moveArray[i][j] = up+1
 
                     else: #use diagonal
-                        moveArray[i][j] = (diagonal[0]+1, ghost2[i], (i-1,j-1))
+                        moveArray[i][j] = diagonal+1
 
                 else: # do not consider diagonal
-                    if left[0] < up[0]:
-                        moveArray[i][j] = (left[0]+1, ghost1[j], (i,j-1))
+                    if left < up:
+                        moveArray[i][j] = left+1
                     else:
-                        moveArray[i][j] = (up[0]+1, ghost2[i], (i-1,j))
-
-    return recoverPath2D(moveArray)
+                        moveArray[i][j] = up+1
+    return recoverPath2D(moveArray, ghost1, ghost2)
 
 
 # res = double_kill(['A','B','B','B'], ['C','B','B','B','B'])
@@ -128,110 +239,82 @@ def triple_kill(ghost1, ghost2, ghost3):
     ghost3 = ['_']+ghost3
 
     # [ghost3][ghost2][ghost1] order of indexing
-    moveArray = [[0 for i in range(len(ghost1))] for j in range(len(ghost2)) for k in range(len(ghost3))]
-    moveArray[0][0][0] = (0, '_', (-1,-1,-1))
+
+    moveArray = [[[0 for i in range(len(ghost1))] for j in range(len(ghost2))] for k in range(len(ghost3))]
+    #moveArray[0][0][0] = (0, '_', (-1,-1,-1)) #add in the blank starting spot
     
-    for k in len(range(ghost3)):
-        for i in len(range(ghost2)):
-            for j in len(range(ghost1)):
+    for k in range(len(ghost3)): # consider one ij plane at a time
+        for i in range(len(ghost2)): # for a given row
+            for j in range(len(ghost1)): # fill in the whole column of that row
 
                 # ignore the origin 
                 if i==0 and j==0 and k==0:
                     continue
 
-                # move along a row
-                elif k=0 and i=0:
-                    moveArray[k][i][j] = (moveArray[k][i][j-1][0]+1, ghost1[j], (k, i, j-1)
+                # parent must be from left
+                elif k==0 and i==0:
+                    moveArray[k][i][j] = moveArray[k][i][j-1]+1
 
-                # move down a column
-                elif k=0 and j=0:
-                    moveArray[k][i][j] = (moveArray[k][i-1][j][0]+1, ghost2[i], (k, i-1, j)
+                # parent must be above
+                elif k==0 and j==0:
+                    moveArray[k][i][j] = moveArray[k][i-1][j]+1
 
-                # move along depth axis
-                elif i=0 and j=0:
-                    moveArray[k][i][j] = (moveArray[k-1][i][j][0]+1, ghost3[k], (k-1, i, j)
+                # parent must be from behind (on k axis)
+                elif i==0 and j==0:
+                    moveArray[k][i][j] = moveArray[k-1][i][j]+1
 
-                elif k=0: # building up the front plane
-                    # consider left, up, diagonal
-                    left = moveArray[k][i][j-1]
-                    up = moveArray[k][i-1][j]
-                    
-                    # we can consider diagonal
+                elif k==0: # we are in the front plane, so 
+                    # consider: parent i, parent j, parent ij
                     if ghost1[j] == ghost2[i]:
-                        diagonal = moveArray[k][i-1][j-1]
-                        # if we want the left parent
-                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
-                            moveArray[k][i][j] = (left[0]+1, ghost1[j], (k,i,j-1))
-                        # if we want the above parent
-                        elif up[0] < diagonal[0]:
-                            moveArray[k][i][j] = (up[0]+1, ghost2[i], (k,i-1,j))
-                        else: #use diagonal
-                            moveArray[k][i][j] = (diagonal[0]+1, ghost2[i], (k,i-1,j-1))
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k][i][j-1], moveArray[k][i-1][j-1])
+                    else:
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k][i][j-1])
 
-                    else: # do not consider diagonal
-                        if left[0] < up[0]:
-                            moveArray[k][i][j] = (left[0]+1, ghost1[j], (k,i,j-1))
-                        else:
-                            moveArray[k][i][j] = (up[0]+1, ghost2[i], (k,i-1,j))
+                elif j==0: # we are in the left plane
+                    # consider: parent i, parent k, parent ik
+                    if ghost2[i] == ghost3[k]:
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k-1][i][j], moveArray[k-1][i-1][j])
+                    else:
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i-1][j], moveArray[k-1][i][j])
 
-                elif i=0: # building up the top plane as if we were looking down from the top
-                    # consider left, up, diagonal
-                    left = moveArray[k-1][i][j]
-                    up = moveArray[k][i][j-1]
-                    
-                    # we can consider diagonal
-                    if ghost3[k] == ghost1[j]:
-                        diagonal = moveArray[k-1][i][j-1]
-                        # if we want the left parent
-                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
-                            moveArray[k][i][j] = (left[0]+1, ghost3[k], (k-1,i,j))
-                        # if we want the above parent
-                        elif up[0] < diagonal[0]:
-                            moveArray[k][i][j] = (up[0]+1, ghost1[j], (k,i,j-1))
-                        else: #use diagonal
-                            moveArray[k][i][j] = (diagonal[0]+1, ghost1[j], (k-1,i,j-1))
-
-                    else: # do not consider diagonal
-                        if left[0] < up[0]: #use left parent
-                            moveArray[k][i][j] = (left[0]+1, ghost3[k], (k-1,i,j))
-                        else: # use above parent
-                            moveArray[k][i][j] = (up[0]+1, ghost1[j], (k,i,j-1))
-
-                elif j=0: # build up the left side plane is if we were looking for the left side
-                    # consider left, up, diagonal
-                    left = moveArray[k][i-1][j]
-                    up = moveArray[k-1][i][j]
-                    
-                    # we can consider diagonal
-                    if ghost3[k] == ghost2[i]:
-                        diagonal = moveArray[k-1][i-1][j]
-                        # if we want the left parent
-                        if (left[0] < up[0]) and (left[0] < diagonal[0]):
-                            moveArray[k][i][j] = (left[0]+1, ghost2[i], (k,i-1,j))
-                        # if we want the above parent
-                        elif up[0] < diagonal[0]:
-                            moveArray[k][i][j] = (up[0]+1, ghost3[k], (k-1,i,j))
-                        else: #use diagonal
-                            moveArray[k][i][j] = (diagonal[0]+1, ghost3[k], (k-1,i-1,j))
-
-                    else: # do not consider diagonal
-                        if left[0] < up[0]: #use left parent
-                            moveArray[k][i][j] = (left[0]+1, ghost2[i], (k,i-1,j))
-                        else: # use above parent
-                            moveArray[k][i][j] = (up[0]+1, ghost3[k], (k-1,i,j))
+                elif i==0: # we are in the top plane
+                    # consider: parent j, parent k, and parent jk
+                    if ghost1[j] == ghost3[k]:
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i][j-1], moveArray[k-1][i][j], moveArray[k-1][i][j-1])
+                    else:
+                        moveArray[k][i][j] = 1 + min(moveArray[k][i][j-1], moveArray[k-1][i][j])
 
                 else:
-                    
+                    # all possible parents
                     parent_i = moveArray[k][i-1][j]
                     parent_j = moveArray[k][i][j-1]
                     parent_k = moveArray[k-1][i][j]
-                    parent_jk = moveArray[k-1][i][j-1]
-                    parent_ik = moveArray[k-1][i-1][j-1]
                     parent_ij = moveArray[k][i-1][j-1]
+                    parent_jk = moveArray[k-1][i][j-1]
+                    parent_ik = moveArray[k-1][i-1][j]
                     parent_ijk = moveArray[k-1][i-1][j-1]
 
+                    if ghost1[j] == ghost3[k] and ghost1[j] == ghost2[i]: # then ijk is possible
+                        moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k, parent_ij, parent_jk, parent_ik, parent_ijk)
+                    
+                    elif ghost1[j] == ghost2[i]: #ij is possible
+                        moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k, parent_ij)
 
-                    if ghost1[j]==ghost2[i]==ghost3[k]: #ijk is possible
+                    elif ghost2[i] == ghost3[k]: #ik is possible
+                        moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k, parent_ik)
+
+                    elif ghost1[j] == ghost3[k]: #jk is possible
+                        moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k, parent_jk)
+
+                    else: # just consider i, j, k
+                        moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k)      
+
+    print("Matrix ans:", moveArray[len(ghost3)-1][len(ghost2)-1][len(ghost1)-1])
+    return recoverPath3D(moveArray, ghost1, ghost2, ghost3)
 
 
-
+moves1 = ['C', 'B', 'A']
+moves2 = ['B', 'A', 'B']
+moves3 = ['D', 'C', 'D']
+student_res = triple_kill(moves1, moves2, moves3)
+print(student_res)
