@@ -2,9 +2,7 @@
 ##########  PROBLEM 5-4 ###########
 ###################################
 
-from operator import itemgetter
-from collections import deque
-
+#from collections import deque
 
 def pp(matrix):
     for i in range(len(matrix)):
@@ -15,18 +13,18 @@ def recoverPath2D(moveArray, ghost1, ghost2):
     """
     Starting from last move, follow parent pointers back until we get a parent points to (0,0), which is the start point
     """
-    moveSeq = deque()
+    moveSeq = []
 
     i = len(moveArray)-1
     j = len(moveArray[0])-1
 
     while (i + j) > 0:
         if i==0: # we can only move left
-            moveSeq.appendleft(ghost1[j])
+            moveSeq.append(ghost1[j])
             j-=1
 
         elif j==0: # we can only move up
-            moveSeq.appendleft(ghost2[i])
+            moveSeq.append(ghost2[i])
             i-=1
 
         else: # consider left, up, diagonal
@@ -35,21 +33,22 @@ def recoverPath2D(moveArray, ghost1, ghost2):
             diagonalParent = moveArray[i-1][j-1]
 
             if ghost1[j] == ghost2[i]: # go diagonal
-                moveSeq.appendleft(ghost2[i])
+                moveSeq.append(ghost2[i])
                 i -= 1
                 j -= 1
             elif leftParent < aboveParent: # go left
-                moveSeq.appendleft(ghost1[j])
+                moveSeq.append(ghost1[j])
                 j-=1
             else: # go up
-                moveSeq.appendleft(ghost2[i])
+                moveSeq.append(ghost2[i])
                 i-=1
-    
+
+    moveSeq.reverse()
     return moveSeq
 
 
 def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
-    moveSeq = deque()
+    moveSeq = []
 
     k = len(moveArray)-1
     i = len(moveArray[0])-1
@@ -57,92 +56,103 @@ def recoverPath3D(moveArray, ghost1, ghost2, ghost3):
     print(moveArray[k][i][j])
 
     while (i+j+k) > 0:
+        print(i,j,k)
         if i==0 and j==0: # we can only move in k direction
-            moveSeq.appendleft(ghost3[k])
+            moveSeq.append(ghost3[k])
             k-=1
 
         elif j==0 and k==0: # we can only move in i direction
-            moveSeq.appendleft(ghost2[i])
+            moveSeq.append(ghost2[i])
             i-=1
 
         elif i==0 and k==0: # we can only move in j direction
-            moveSeq.appendleft(ghost1[j])
+            moveSeq.append(ghost1[j])
             j-=1
 
         elif i==0: # we can only move in j or k directions
-            if ghost1[j] == ghost3[k] and moveArray[k-1][i][j-1] <= moveArray[k-1][i][j] and moveArray[k-1][i][j-1] <= moveArray[k][i][j-1]: 
+            parent_j = moveArray[k][i][j-1]
+            parent_k = moveArray[k-1][i][j]
+            parent_jk = moveArray[k-1][i][j-1]
+            if ghost1[j] == ghost3[k] and parent_jk == min(parent_j, parent_k, parent_jk): 
                 # move diagonally if it is best 
-                moveSeq.appendleft(ghost3[k])
+                moveSeq.append(ghost3[k])
                 j-=1
                 k-=1
             else: # move in j or k direction
-                if moveArray[k][i][j-1] < moveArray[k-1][i][j]: # move in j
-                    moveSeq.appendleft(ghost1[j])
+                if parent_j < parent_k: # move in j
+                    moveSeq.append(ghost1[j])
                     j-=1
                 else:
-                    moveSeq.appendleft(ghost3[k]) # move in k
+                    moveSeq.append(ghost3[k]) # move in k
                     k-=1
 
         elif j==0: # we can only move in i or k directions
-            if ghost2[i] == ghost3[k] and moveArray[k-1][i-1][j] <= moveArray[k-1][i][j] and moveArray[k-1][i-1][j] <= moveArray[k][i-1][j]: 
-            # move diagonally
-                moveSeq.appendleft(ghost3[k])
+            parent_i = moveArray[k][i-1][j]
+            parent_k = moveArray[k-1][i][j]
+            parent_ik = moveArray[k-1][i-1][j]
+            if ghost2[i] == ghost3[k] and parent_ik == min(parent_i, parent_k, parent_ik): 
+                # move diagonally
+                moveSeq.append(ghost3[k])
                 i-=1
                 k-=1
             else: # move in i or k direction
-                if moveArray[k][i-1][j] < moveArray[k-1][i][j]: # move in i
-                    moveSeq.appendleft(ghost2[i])
+                if parent_i < parent_k: # move in i
+                    moveSeq.append(ghost2[i])
                     i-=1
-                else:
-                    moveSeq.appendleft(ghost3[k])
+                else: # move in k
+                    moveSeq.append(ghost3[k])
                     k-=1
 
         elif k==0: # we can only move in i or j directions
-            if ghost1[j] == ghost2[i] and moveArray[k][i-1][j-1] <= moveArray[k][i-1][j] and moveArray[k][i-1][j-1] <= moveArray[k][i][j-1]: 
+            parent_i = moveArray[k][i-1][j]
+            parent_j = moveArray[k][i][j-1]
+            parent_ij = moveArray[k][i-1][j-1]
+
+            if ghost1[j] == ghost2[i] and parent_ij == min(parent_i, parent_j, parent_ij): 
             # move diagonally
-                moveSeq.appendleft(ghost2[i])
+                moveSeq.append(ghost2[i])
                 j-=1
                 i-=1
             else: # move in i or j direction
-                if moveArray[k][i-1][j] < moveArray[k][i][j-1]: # move in i
-                    moveSeq.appendleft(ghost2[i])
+                if parent_i < parent_j: # move in i
+                    moveSeq.append(ghost2[i])
                     i-=1
-                else:
-                    moveSeq.appendleft(ghost1[j])
+                else: # move in j
+                    moveSeq.append(ghost1[j])
                     j-=1
 
         else: # we can go in any of 7 directions
             parent_j = moveArray[k][i][j-1]
             parent_i = moveArray[k][i-1][j]
             parent_k = moveArray[k-1][i][j]
+            parent_ij = moveArray[k][i-1][j-1]
+            parent_ik = moveArray[k-1][i-1][j]
+            parent_jk = moveArray[k-1][i][j-1]
+            parent_ijk = moveArray[k-1][i-1][j-1]
 
-            if ghost1[j] == ghost2[i] and ghost1[j] == ghost3[k]: # use ijk
-                moveSeq.appendleft(ghost2[i])
-                i-=1
-                j-=1
-                k-=1
-            elif ghost1[j] == ghost2[i]: # use ij
-                moveSeq.appendleft(ghost2[i])
-                i-=1
-                j-=1
-            elif ghost1[j] == ghost3[k]: # use jk
-                moveSeq.appendleft(ghost1[j])
-                j-=1
-                k-=1
-            elif ghost2[i] == ghost3[k]: # use ik
-                moveSeq.appendleft(ghost2[i])
-                i-=1
-                k-=1
+            if ghost1[j] == ghost2[i] and ghost1[j] == ghost3[k] and parent_ijk==min(parent_i, parent_j, parent_k, parent_ik, parent_ij, parent_jk, parent_ijk): # ijk possible
+                moveSeq.append(ghost2[i])
+                i,j,k = i-1, j-1, k-1
+            elif ghost1[j] == ghost2[i] and parent_ij == min(parent_i, parent_j, parent_k, parent_ij): # use ij
+                moveSeq.append(ghost2[i])
+                i,j = i-1, j-1
+            elif ghost1[j] == ghost3[k] and parent_jk == min(parent_i, parent_j, parent_k, parent_jk): # use jk
+                moveSeq.append(ghost1[j])
+                j,k = j-1, k-1
+            elif ghost2[i] == ghost3[k] and parent_ik == min(parent_i, parent_j, parent_k, parent_ik): # use ik
+                moveSeq.append(ghost2[i])
+                i,k = i-1,k-1
             else: # use whichever of i, j, k is shortest
                 if parent_i < parent_j and parent_i < parent_k: # use parent_i
-                    moveSeq.appendleft(ghost2[i])
+                    moveSeq.append(ghost2[i])
                     i-=1
                 elif parent_j < parent_i and parent_j < parent_k: # use parent_j
-                    moveSeq.appendleft(ghost1[j])
+                    moveSeq.append(ghost1[j])
                     j-=1
                 else:
-                    moveSeq.appendleft(ghost3[k])
+                    moveSeq.append(ghost3[k])
                     k-=1
+    moveSeq.reverse()
     return moveSeq
 
 def double_kill(ghost1, ghost2):
@@ -309,12 +319,13 @@ def triple_kill(ghost1, ghost2, ghost3):
                     else: # just consider i, j, k
                         moveArray[k][i][j] = 1 + min(parent_i, parent_j, parent_k)      
 
-    print("Matrix ans:", moveArray[len(ghost3)-1][len(ghost2)-1][len(ghost1)-1])
+    #print("Matrix ans:", moveArray[len(ghost3)-1][len(ghost2)-1][len(ghost1)-1])
     return recoverPath3D(moveArray, ghost1, ghost2, ghost3)
 
 
-moves1 = ['C', 'B', 'A']
-moves2 = ['B', 'A', 'B']
-moves3 = ['D', 'C', 'D']
+moves1 = ['C', 'B', 'A', 'B', 'A', 'D']
+moves2 = ['B', 'A', 'B', 'A', 'D', 'C', 'D']
+moves3 = ['D', 'C', 'D', 'A', 'A']
 student_res = triple_kill(moves1, moves2, moves3)
+print len(student_res)
 print(student_res)
